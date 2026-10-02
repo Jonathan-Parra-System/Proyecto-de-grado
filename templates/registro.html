@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear cuenta | Plataforma Educativa</title>
-    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" sizes="any">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-jpa.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico', v=2) }}" sizes="any">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-jpa.png', v=2) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="login-page">
@@ -136,11 +136,7 @@
 
         <aside class="login-aside" aria-label="Información sobre el aprendizaje">
             <div class="login-aside-content">
-                <div class="login-illustration" aria-hidden="true">
-                    <span>✦</span>
-                    <strong>学</strong>
-                    <span>✦</span>
-                </div>
+                <img class="login-author-logo" src="{{ url_for('static', filename='images/favicon-jpa.png', v=2) }}" alt="Logotipo de Jonathan Parra">
                 <p class="login-aside-eyebrow">TU PRÓXIMO PASO</p>
                 <h2>Un mundo nuevo de conocimientos te espera</h2>
                 <p>Crea tu cuenta para guardar tu avance y continuar tus lecciones cuando quieras.</p>

@@ -878,10 +878,7 @@ form button {
     width: min(190px, 24vw);
     height: auto;
     max-height: 116px;
-    padding: 5px;
     transform: translateY(-50%);
-    border-radius: 8px;
-    background: #fff;
     object-fit: contain;
 }
 
@@ -1026,6 +1023,13 @@ form button {
 
 .login-header .uts-header-logo {
     right: 5.5%;
+}
+
+.login-author-logo {
+    display: block;
+    width: clamp(145px, 20vw, 205px);
+    height: auto;
+    margin: 0 auto 30px;
 }
 
 .login-site-footer {
@@ -2447,7 +2451,6 @@ input:focus {
         right: 0;
         width: 72px;
         max-height: 48px;
-        padding: 3px;
     }
 
     .learning-page .home-site-header {
@@ -2464,6 +2467,11 @@ input:focus {
 
     .learning-page .home-site-header p {
         font-size: 12px;
+    }
+
+    .login-author-logo {
+        width: 132px;
+        margin-bottom: 22px;
     }
 
     .site-footer {

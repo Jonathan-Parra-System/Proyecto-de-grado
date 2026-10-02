@@ -1,3 +1,5 @@
 .env
 __pycache__/
 *.sql
+!crear_base_datos_desde_cero.sql
+!migracion_gestion_administrativa.sql

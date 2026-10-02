@@ -20,11 +20,37 @@ CREATE TABLE IF NOT EXISTS usuarios (
     genero VARCHAR(32) NULL,
     edad TINYINT UNSIGNED NULL,
     fecha_nacimiento DATE NULL,
+    email_verificado TINYINT(1) NULL DEFAULT NULL,
     rol VARCHAR(20) NOT NULL DEFAULT 'estudiante',
     ultimo_inicio_sesion DATETIME NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_usuarios_usuario (usuario),
     UNIQUE KEY uq_usuarios_email (email)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS tokens_seguridad_correo (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    usuario_id INT NOT NULL,
+    proposito VARCHAR(20) NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    expira_en DATETIME NOT NULL,
+    usado_en DATETIME NULL,
+    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_tokens_seguridad_hash (token_hash),
+    KEY idx_tokens_seguridad_usuario (usuario_id, proposito, usado_en),
+    CONSTRAINT fk_tokens_seguridad_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS solicitudes_seguridad_correo (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    ip_hash CHAR(64) NOT NULL,
+    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_solicitudes_correo_ip_fecha (ip_hash, creado_en),
+    KEY idx_solicitudes_correo_fecha (creado_en)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS progreso_lecciones (

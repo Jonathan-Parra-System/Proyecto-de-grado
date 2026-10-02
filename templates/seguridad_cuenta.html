@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Seguridad de la cuenta | Plataforma Educativa</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico', v=3) }}" sizes="any">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-jpa.png', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+    <header class="login-header">
+        <div class="login-header-copy">
+            <a class="login-brand" href="{{ url_for('inicio') }}">
+                <span class="login-brand-icon" aria-hidden="true">▰</span>
+                <span>Plataforma Educativa</span>
+            </a>
+            <span class="login-header-caption">Seguridad de tu cuenta</span>
+        </div>
+        <img class="uts-header-logo" src="{{ url_for('static', filename='images/uts-logo.png') }}" alt="Unidades Tecnológicas de Santander, UTS" width="1287" height="768">
+    </header>
+
+    <main class="login-layout">
+        <section class="login-content" aria-labelledby="security-title">
+            <div class="login-form-container">
+                {% if modo == "recuperar" %}
+                    <p class="login-eyebrow">RECUPERACIÓN SEGURA</p>
+                    <h1 id="security-title">¿Olvidaste tu contraseña?</h1>
+                    <p class="login-intro">Escribe el correo asociado a tu cuenta. Si existe, enviaremos un enlace que vence en 5 minutos.</p>
+                    {% if mensaje %}<p class="login-message login-message-success" role="status">{{ mensaje }}</p>{% endif %}
+                    <form class="login-form" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <label for="email">Correo electrónico</label>
+                        <input id="email" type="email" name="email" maxlength="254" autocomplete="email" required>
+                        <button type="submit">Enviar instrucciones</button>
+                    </form>
+                {% elif modo == "verificar" %}
+                    <p class="login-eyebrow">CONFIRMA TU CORREO</p>
+                    <h1 id="security-title">Reenviar confirmación</h1>
+                    <p class="login-intro">Indica el correo usado al crear tu cuenta y te enviaremos otro enlace de confirmación.</p>
+                    {% if mensaje %}<p class="login-message login-message-success" role="status">{{ mensaje }}</p>{% endif %}
+                    <form class="login-form" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <label for="email">Correo electrónico</label>
+                        <input id="email" type="email" name="email" maxlength="254" autocomplete="email" required>
+                        <button type="submit">Reenviar confirmación</button>
+                    </form>
+                {% elif modo == "verificar_completo" %}
+                    <p class="login-eyebrow">CONFIRMACIÓN COMPLETADA</p>
+                    <h1 id="security-title">Correo confirmado</h1>
+                    <p class="login-intro">Tu cuenta ya está activa. Puedes iniciar sesión.</p>
+                {% elif modo == "verificar_token" %}
+                    <p class="login-eyebrow">CONFIRMA TU CORREO</p>
+                    {% if token_valido %}
+                        <h1 id="security-title">Confirma que este correo es tuyo</h1>
+                        <p class="login-intro">Al confirmar, activarás tu cuenta y podrás iniciar sesión.</p>
+                        <form class="login-form" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit">Confirmar correo</button>
+                        </form>
+                    {% else %}
+                        <h1 id="security-title">Enlace no válido o vencido</h1>
+                        <p class="login-intro">Solicita otro enlace de confirmación para activar tu cuenta.</p>
+                        <a class="login-back-link" href="{{ url_for('reenviar_verificacion') }}">Solicitar otro enlace</a>
+                    {% endif %}
+                {% elif modo == "restablecer" and token_valido %}
+                    <p class="login-eyebrow">RECUPERACIÓN SEGURA</p>
+                    <h1 id="security-title">Crea una contraseña nueva</h1>
+                    <p class="login-intro">El enlace se puede utilizar una sola vez y vence 5 minutos después de solicitarlo.</p>
+                    {% if error %}<p class="login-message login-message-error" role="alert">{{ error }}</p>{% endif %}
+                    <form class="login-form" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <label for="contrasena">Nueva contraseña</label>
+                        <div class="password-input-group">
+                            <input id="contrasena" type="password" name="contrasena" minlength="8" maxlength="128" autocomplete="new-password" data-password-policy required>
+                            <button class="password-toggle" type="button" data-password-toggle="contrasena" aria-pressed="false">Mostrar</button>
+                        </div>
+                        <label for="confirmacion">Confirma la contraseña</label>
+                        <div class="password-input-group">
+                            <input id="confirmacion" type="password" name="confirmacion" minlength="8" maxlength="128" autocomplete="new-password" required>
+                            <button class="password-toggle" type="button" data-password-toggle="confirmacion" aria-pressed="false">Mostrar</button>
+                        </div>
+                        <p class="register-password-help">Entre 8 y 128 caracteres, una mayúscula y un símbolo; no uses tres números consecutivos como 123 o 321.</p>
+                        <button type="submit">Guardar contraseña nueva</button>
+                    </form>
+                {% elif modo == "restablecer_completo" %}
+                    <p class="login-eyebrow">RECUPERACIÓN COMPLETADA</p>
+                    <h1 id="security-title">Contraseña actualizada</h1>
+                    <p class="login-intro">Ya puedes iniciar sesión con tu nueva contraseña.</p>
+                {% else %}
+                    <p class="login-eyebrow">RECUPERACIÓN SEGURA</p>
+                    <h1 id="security-title">Enlace no válido o vencido</h1>
+                    <p class="login-intro">Solicita otro enlace. Por seguridad, cada enlace solo funciona una vez y vence en 5 minutos.</p>
+                    <a class="login-back-link" href="{{ url_for('solicitar_recuperacion') }}">Solicitar otro enlace</a>
+                {% endif %}
+                <a class="login-back-link" href="{{ url_for('login') }}">Volver a iniciar sesión</a>
+            </div>
+        </section>
+        <aside class="login-aside" aria-label="Información de la plataforma">
+            <div class="login-aside-content">
+                <img class="login-author-logo" src="{{ url_for('static', filename='images/favicon-jpa.png', v=3) }}" alt="Logotipo de Jonathan Parra">
+                <p class="login-aside-eyebrow">PROTECCIÓN DE TU CUENTA</p>
+                <h2>Solo tú puedes cambiar tu contraseña</h2>
+                <p>No compartas el enlace de recuperación. Si no solicitaste el cambio, ignora el correo.</p>
+            </div>
+        </aside>
+    </main>
+    <footer class="site-footer login-site-footer">
+        <p>© 2026 Jonathan Parra · Bucaramanga, Santander, Colombia · Celular: <a href="tel:3238157772">3238157772</a></p>
+    </footer>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

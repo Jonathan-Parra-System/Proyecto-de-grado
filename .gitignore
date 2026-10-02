@@ -4,3 +4,4 @@ __pycache__/
 !crear_base_datos_desde_cero.sql
 !migracion_gestion_administrativa.sql
 !migracion_perfil_usuario.sql
+!migracion_recuperacion_contrasena.sql

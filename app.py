@@ -1,12 +1,19 @@
 import os
 import hmac
+import hashlib
+import html
 import json
+import logging
 import re
 import secrets
+import smtplib
+import ssl
 import unicodedata
 from datetime import date
+from email.message import EmailMessage
 from functools import wraps
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import mysql.connector
 from flask import Flask, abort, flash, render_template, request, session, redirect, url_for
@@ -90,6 +97,159 @@ def validar_csrf():
     guardado = session.get("csrf_token", "")
     if not guardado or not hmac.compare_digest(enviado, guardado):
         abort(400)
+
+
+class ErrorEnvioCorreo(RuntimeError):
+    pass
+
+
+def _limite_envio_correo(cursor):
+    ip = request.remote_addr or "unknown"
+    ip_hash = hmac.new(
+        app.secret_key.encode("utf-8"),
+        ip.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    cursor.execute(
+        """
+        DELETE FROM solicitudes_seguridad_correo
+        WHERE creado_en < UTC_TIMESTAMP() - INTERVAL 1 DAY
+        """
+    )
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM solicitudes_seguridad_correo
+        WHERE ip_hash = %s
+          AND creado_en > UTC_TIMESTAMP() - INTERVAL 1 HOUR
+        """,
+        (ip_hash,)
+    )
+    if cursor.fetchone()[0] >= 5:
+        return False
+    cursor.execute(
+        "INSERT INTO solicitudes_seguridad_correo (ip_hash) VALUES (%s)",
+        (ip_hash,)
+    )
+    return True
+
+
+def _crear_token_correo(cursor, usuario_id, proposito):
+    duracion_minutos = 5 if proposito == "recuperacion" else 1440
+    cursor.execute(
+        """
+        DELETE FROM tokens_seguridad_correo
+        WHERE usado_en IS NOT NULL
+           OR expira_en < UTC_TIMESTAMP() - INTERVAL 30 DAY
+        """
+    )
+    cursor.execute(
+        """
+        UPDATE tokens_seguridad_correo
+        SET usado_en = UTC_TIMESTAMP()
+        WHERE usuario_id = %s AND proposito = %s AND usado_en IS NULL
+        """,
+        (usuario_id, proposito)
+    )
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    cursor.execute(
+        """
+        INSERT INTO tokens_seguridad_correo
+            (usuario_id, proposito, token_hash, expira_en)
+        VALUES (%s, %s, %s, UTC_TIMESTAMP() + INTERVAL %s MINUTE)
+        """,
+        (usuario_id, proposito, token_hash, duracion_minutos)
+    )
+    return token
+
+
+def _enviar_correo_seguridad(destinatario, asunto, texto, html):
+    configuracion = {
+        "host": os.getenv("SMTP_HOST"),
+        "usuario": os.getenv("SMTP_USER"),
+        "contrasena": os.getenv("SMTP_PASSWORD"),
+        "remitente": os.getenv("SMTP_FROM"),
+        "url_base": os.getenv("PUBLIC_BASE_URL"),
+    }
+    faltantes = [nombre for nombre, valor in configuracion.items() if not valor]
+    if faltantes:
+        raise ErrorEnvioCorreo(
+            "Falta configurar el servicio de correo y la URL pública en Render."
+        )
+    url = urlsplit(configuracion["url_base"])
+    if (
+        url.scheme not in {"https", "http"}
+        or not url.netloc
+        or (url.scheme != "https" and url.hostname not in {"localhost", "127.0.0.1"})
+    ):
+        raise ErrorEnvioCorreo("PUBLIC_BASE_URL debe ser una URL pública HTTPS válida.")
+    try:
+        puerto = int(os.getenv("SMTP_PORT", "587"))
+    except ValueError as error:
+        raise ErrorEnvioCorreo("SMTP_PORT debe ser un número.") from error
+
+    mensaje = EmailMessage()
+    mensaje["Subject"] = asunto
+    mensaje["From"] = configuracion["remitente"]
+    mensaje["To"] = destinatario
+    mensaje.set_content(texto)
+    mensaje.add_alternative(html, subtype="html")
+    try:
+        contexto = ssl.create_default_context()
+        with smtplib.SMTP(configuracion["host"], puerto, timeout=15) as servidor:
+            servidor.starttls(context=contexto)
+            servidor.login(configuracion["usuario"], configuracion["contrasena"])
+            servidor.send_message(mensaje)
+    except (OSError, smtplib.SMTPException) as error:
+        raise ErrorEnvioCorreo("No fue posible enviar el correo de seguridad.") from error
+
+
+def _enviar_enlace_seguridad(destinatario, usuario, token, proposito):
+    from flask import url_for
+
+    if proposito == "recuperacion":
+        ruta = url_for("restablecer_contrasena", token=token)
+        asunto = "Restablece la contraseña de tu cuenta"
+        accion = "Restablecer contraseña"
+        duracion = "5 minutos"
+        descripcion = "Solicitaste cambiar la contraseña de tu cuenta."
+    else:
+        ruta = url_for("verificar_correo", token=token)
+        asunto = "Confirma el correo de tu cuenta"
+        accion = "Confirmar correo"
+        duracion = "24 horas"
+        descripcion = "Confirma que este correo te pertenece para activar tu cuenta."
+    base = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+    enlace = f"{base}{ruta}"
+    texto = (
+        f"Hola {usuario},\n\n{descripcion}\n"
+        f"Abre este enlace dentro de {duracion}:\n{enlace}\n\n"
+        "Si no solicitaste este mensaje, puedes ignorarlo."
+    )
+    contenido_html = (
+        f"<p>Hola {html.escape(usuario)},</p><p>{html.escape(descripcion)}</p>"
+        f'<p><a href="{html.escape(enlace, quote=True)}">{html.escape(accion)}</a></p>'
+        f"<p>El enlace vence en {html.escape(duracion)}. "
+        "Si no solicitaste este mensaje, puedes ignorarlo.</p>"
+    )
+    _enviar_correo_seguridad(destinatario, asunto, texto, contenido_html)
+
+
+def _token_seguridad_valido(cursor, token, proposito, bloquear=False):
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    cursor.execute(
+        """
+        SELECT t.id, t.usuario_id, u.usuario, u.email
+        FROM tokens_seguridad_correo AS t
+        JOIN usuarios AS u ON u.id = t.usuario_id
+        WHERE t.token_hash = %s AND t.proposito = %s
+          AND t.usado_en IS NULL AND t.expira_en > UTC_TIMESTAMP()
+          AND u.activo = 1
+        """ + (" FOR UPDATE" if bloquear else ""),
+        (token_hash, proposito)
+    )
+    return cursor.fetchone()
 
 
 def _error_contrasena(contrasena):
@@ -344,7 +504,7 @@ def login():
         try:
             cursor.execute(
                 """
-                SELECT id, contrasena, contrasena_hash, rol, activo
+                SELECT id, contrasena, contrasena_hash, rol, activo, email_verificado
                 FROM usuarios
                 WHERE usuario = %s
                 """,
@@ -353,13 +513,20 @@ def login():
             resultado = cursor.fetchone()
 
             if resultado:
-                usuario_id, contrasena_antigua, contrasena_hash, rol, activo = resultado
+                usuario_id, contrasena_antigua, contrasena_hash, rol, activo, email_verificado = resultado
                 es_valida = (
                     check_password_hash(contrasena_hash, contrasena)
                     if contrasena_hash
                     else contrasena_antigua == contrasena
                 )
                 if es_valida and activo and rol in {"admin", "estudiante"}:
+                    if email_verificado == 0:
+                        return render_template(
+                            "login.html",
+                            error="Confirma tu correo electrónico antes de iniciar sesión.",
+                            usuario=usuario,
+                            requiere_verificacion=True,
+                        )
                     if not contrasena_hash:
                         cursor.execute(
                             """
@@ -396,6 +563,248 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/recuperar-contrasena", methods=["GET", "POST"])
+def solicitar_recuperacion():
+    if request.method == "POST":
+        validar_csrf()
+        correo = request.form.get("email", "").strip().lower()
+        enlace_envio = None
+        conexion = conectar_db()
+        cursor = conexion.cursor()
+        try:
+            if not _limite_envio_correo(cursor):
+                conexion.rollback()
+                return render_template(
+                    "seguridad_cuenta.html",
+                    modo="recuperar",
+                    mensaje="Si el correo corresponde a una cuenta activa, recibirás instrucciones. Revisa tu correo y vuelve a intentar más tarde si no llega ningún mensaje.",
+                )
+            cursor.execute(
+                """
+                SELECT id, usuario, email_verificado
+                FROM usuarios
+                WHERE email = %s AND activo = 1
+                """,
+                (correo,)
+            )
+            cuenta = cursor.fetchone()
+            if cuenta:
+                usuario_id, nombre, email_verificado = cuenta
+                proposito = "verificacion" if email_verificado == 0 else "recuperacion"
+                token = _crear_token_correo(cursor, usuario_id, proposito)
+                enlace_envio = (correo, nombre, token, proposito)
+            conexion.commit()
+        except Exception:
+            conexion.rollback()
+            raise
+        finally:
+            cursor.close()
+            conexion.close()
+
+        if enlace_envio:
+            try:
+                _enviar_enlace_seguridad(*enlace_envio)
+            except ErrorEnvioCorreo:
+                logging.exception("No se pudo enviar correo solicitado desde recuperación.")
+        return render_template(
+            "seguridad_cuenta.html",
+            modo="recuperar",
+            mensaje="Si el correo corresponde a una cuenta activa, recibirás instrucciones. Revisa tu correo.",
+        )
+    return render_template("seguridad_cuenta.html", modo="recuperar")
+
+
+@app.route("/reenviar-verificacion", methods=["GET", "POST"])
+def reenviar_verificacion():
+    if request.method == "POST":
+        validar_csrf()
+        correo = request.form.get("email", "").strip().lower()
+        enlace_envio = None
+        conexion = conectar_db()
+        cursor = conexion.cursor()
+        try:
+            if not _limite_envio_correo(cursor):
+                conexion.rollback()
+                return render_template(
+                    "seguridad_cuenta.html",
+                    modo="verificar",
+                    mensaje="Si hay una cuenta pendiente para ese correo, enviaremos un enlace de confirmación.",
+                )
+            cursor.execute(
+                """
+                SELECT id, usuario
+                FROM usuarios
+                WHERE email = %s AND email_verificado = 0 AND activo = 1
+                """,
+                (correo,)
+            )
+            cuenta = cursor.fetchone()
+            if cuenta:
+                usuario_id, nombre = cuenta
+                token = _crear_token_correo(cursor, usuario_id, "verificacion")
+                enlace_envio = (correo, nombre, token, "verificacion")
+            conexion.commit()
+        except Exception:
+            conexion.rollback()
+            raise
+        finally:
+            cursor.close()
+            conexion.close()
+        if enlace_envio:
+            try:
+                _enviar_enlace_seguridad(*enlace_envio)
+            except ErrorEnvioCorreo:
+                logging.exception("No se pudo reenviar confirmación de correo.")
+        return render_template(
+            "seguridad_cuenta.html",
+            modo="verificar",
+            mensaje="Si hay una cuenta pendiente para ese correo, enviaremos un enlace de confirmación.",
+        )
+    return render_template("seguridad_cuenta.html", modo="verificar")
+
+
+@app.route("/verificar-correo/<token>", methods=["GET", "POST"])
+def verificar_correo(token):
+    if request.method == "POST":
+        validar_csrf()
+        conexion = conectar_db()
+        cursor = conexion.cursor()
+        try:
+            registro = _token_seguridad_valido(cursor, token, "verificacion", bloquear=True)
+            if not registro:
+                conexion.rollback()
+                return render_template(
+                    "seguridad_cuenta.html",
+                    modo="verificar_token",
+                    token_valido=False,
+                )
+            token_id, usuario_id, _, _ = registro
+            cursor.execute(
+                "UPDATE usuarios SET email_verificado = 1 WHERE id = %s AND activo = 1",
+                (usuario_id,)
+            )
+            if cursor.rowcount != 1:
+                conexion.rollback()
+                return render_template(
+                    "seguridad_cuenta.html",
+                    modo="verificar_token",
+                    token_valido=False,
+                )
+            cursor.execute(
+                "UPDATE tokens_seguridad_correo SET usado_en = UTC_TIMESTAMP() WHERE id = %s",
+                (token_id,)
+            )
+            conexion.commit()
+        except Exception:
+            conexion.rollback()
+            raise
+        finally:
+            cursor.close()
+            conexion.close()
+        return render_template(
+            "seguridad_cuenta.html",
+            modo="verificar_completo",
+            token_valido=True,
+        )
+
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    try:
+        token_valido = _token_seguridad_valido(cursor, token, "verificacion") is not None
+    finally:
+        cursor.close()
+        conexion.close()
+    return render_template(
+        "seguridad_cuenta.html",
+        modo="verificar_token",
+        token=token,
+        token_valido=token_valido,
+    )
+
+
+@app.route("/restablecer-contrasena/<token>", methods=["GET", "POST"])
+def restablecer_contrasena(token):
+    if request.method == "POST":
+        validar_csrf()
+        contrasena = request.form.get("contrasena", "")
+        confirmacion = request.form.get("confirmacion", "")
+        error = _error_contrasena(contrasena)
+        if error:
+            return render_template(
+                "seguridad_cuenta.html",
+                modo="restablecer",
+                token=token,
+                token_valido=True,
+                error=error,
+            )
+        if contrasena != confirmacion:
+            return render_template(
+                "seguridad_cuenta.html",
+                modo="restablecer",
+                token=token,
+                token_valido=True,
+                error="Las contraseñas no coinciden.",
+            )
+
+        conexion = conectar_db()
+        cursor = conexion.cursor()
+        try:
+            registro = _token_seguridad_valido(cursor, token, "recuperacion", bloquear=True)
+            if not registro:
+                conexion.rollback()
+                return render_template(
+                    "seguridad_cuenta.html",
+                    modo="restablecer",
+                    token_valido=False,
+                )
+            token_id, usuario_id, _, _ = registro
+            cursor.execute(
+                """
+                UPDATE usuarios
+                SET contrasena_hash = %s, contrasena = NULL
+                WHERE id = %s AND activo = 1
+                """,
+                (generate_password_hash(contrasena), usuario_id)
+            )
+            if cursor.rowcount != 1:
+                conexion.rollback()
+                return render_template(
+                    "seguridad_cuenta.html",
+                    modo="restablecer",
+                    token_valido=False,
+                )
+            cursor.execute(
+                """
+                UPDATE tokens_seguridad_correo
+                SET usado_en = UTC_TIMESTAMP()
+                WHERE usuario_id = %s AND proposito = 'recuperacion' AND usado_en IS NULL
+                """,
+                (usuario_id,)
+            )
+            conexion.commit()
+        except Exception:
+            conexion.rollback()
+            raise
+        finally:
+            cursor.close()
+            conexion.close()
+        return render_template("seguridad_cuenta.html", modo="restablecer_completo")
+
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    try:
+        token_valido = _token_seguridad_valido(cursor, token, "recuperacion") is not None
+    finally:
+        cursor.close()
+        conexion.close()
+    return render_template(
+        "seguridad_cuenta.html",
+        modo="restablecer",
+        token=token,
+        token_valido=token_valido,
+    )
+
+
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
     if request.method == "POST":
@@ -424,12 +833,27 @@ def registro():
 
         conexion = conectar_db()
         cursor = conexion.cursor()
+        enlace_envio = None
         try:
+            if not _limite_envio_correo(cursor):
+                conexion.rollback()
+                return render_template(
+                    "registro.html",
+                    error="Se alcanzó el límite de correos por ahora. Inténtalo más tarde.",
+                    usuario=usuario,
+                    email=perfil["email"],
+                    celular=request.form.get("celular", "").strip(),
+                    genero=request.form.get("genero", ""),
+                    edad=request.form.get("edad", "").strip(),
+                    fecha_nacimiento=request.form.get("fecha_nacimiento", ""),
+                    fecha_hoy=date.today().isoformat(),
+                )
             cursor.execute(
                 """
                 INSERT INTO usuarios
-                    (usuario, contrasena_hash, email, celular, genero, edad, fecha_nacimiento)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    (usuario, contrasena_hash, email, celular, genero, edad,
+                     fecha_nacimiento, email_verificado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 0)
                 """,
                 (
                     usuario,
@@ -441,7 +865,10 @@ def registro():
                     perfil["fecha_nacimiento"],
                 )
             )
+            usuario_id = cursor.lastrowid
+            token = _crear_token_correo(cursor, usuario_id, "verificacion")
             conexion.commit()
+            enlace_envio = (perfil["email"], usuario, token, "verificacion")
         except mysql.connector.IntegrityError as error:
             conexion.rollback()
             if error.errno == 1062:
@@ -471,7 +898,16 @@ def registro():
             cursor.close()
             conexion.close()
 
-        return redirect(url_for("login", registrado="1"))
+        try:
+            _enviar_enlace_seguridad(*enlace_envio)
+        except ErrorEnvioCorreo:
+            logging.exception("No se pudo enviar el correo de confirmación durante el registro.")
+            return render_template(
+                "seguridad_cuenta.html",
+                modo="verificar",
+                mensaje="La cuenta quedó pendiente de confirmar, pero no pudimos enviar el correo. Revisa la configuración del servicio de correo o contacta al administrador.",
+            )
+        return redirect(url_for("login", verificacion="1"))
 
     return render_template("registro.html", fecha_hoy=date.today().isoformat())
 

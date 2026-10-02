@@ -27,13 +27,16 @@
                 <h1 id="login-title">¡Qué bueno verte!</h1>
                 <p class="login-intro">Ingresa tus datos para continuar aprendiendo.</p>
 
-                {% if request.args.get('registrado') %}
+                {% if request.args.get('verificacion') %}
                     <p class="login-message login-message-success" role="status">
-                        Cuenta creada. Ya puedes iniciar sesión.
+                        Cuenta creada. Confirma tu correo desde el enlace que te enviamos antes de iniciar sesión.
                     </p>
                 {% endif %}
                 {% if error %}
                     <p class="login-message login-message-error" role="alert">{{ error }}</p>
+                {% endif %}
+                {% if requiere_verificacion %}
+                    <p class="login-register"><a href="{{ url_for('reenviar_verificacion') }}">Reenviar correo de confirmación</a></p>
                 {% endif %}
 
                 <form class="login-form" method="POST">
@@ -65,6 +68,9 @@
                     <button type="submit">Iniciar sesión <span aria-hidden="true">→</span></button>
                 </form>
 
+                <p class="login-register">
+                    <a href="{{ url_for('solicitar_recuperacion') }}">¿Olvidaste tu contraseña?</a>
+                </p>
                 <p class="login-register">
                     ¿Aún no tienes cuenta?
                     <a href="{{ url_for('registro') }}">Crear cuenta</a>

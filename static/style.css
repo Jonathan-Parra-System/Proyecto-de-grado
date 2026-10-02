@@ -1290,32 +1290,24 @@ form button {
 .home-purpose-card {
     padding: 25px;
     border-radius: 12px;
-    background: var(--home-wine);
-    color: var(--home-paper);
-}
-
-.home-purpose-vision {
-    background: var(--home-opal);
+    background: var(--home-beige);
+    color: var(--home-ink);
 }
 
 .home-purpose-card .home-eyebrow {
-    color: #f0cddd !important;
-}
-
-.home-purpose-vision .home-eyebrow {
-    color: #e0eee4 !important;
+    color: var(--home-wine) !important;
 }
 
 .home-purpose-card h2 {
     margin: 0 0 9px;
-    color: #fff;
+    color: var(--home-wine);
     font-family: Georgia, serif;
     font-size: 23px;
 }
 
 .learning-page .home-purpose-card p:last-child {
     margin: 0;
-    color: #f5eee7;
+    color: #51494b;
     font-size: 15px;
     line-height: 1.65;
 }

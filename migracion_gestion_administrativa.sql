@@ -1,7 +1,7 @@
--- Ejecuta una sola vez con root en plataforma_educativa_v2.
--- Conserva cuentas e historiales existentes; las bajas se gestionan con activo=0.
+-- Ejecuta una sola vez después de crear plataforma_educativa_v2
+-- con crear_base_datos_desde_cero.sql.
 -- Después ejecuta `python inicializar_contenido.py` desde la carpeta del proyecto
--- con el entorno de la aplicación activo, para cargar cursos y evaluación inicial.
+-- para cargar cursos y evaluación inicial.
 
 USE plataforma_educativa_v2;
 

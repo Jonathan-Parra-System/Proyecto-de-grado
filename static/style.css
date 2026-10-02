@@ -389,6 +389,11 @@ form button {
 
 .login-form .password-input-group input {
     padding-right: 100px;
+    margin-bottom: 0;
+}
+
+.login-form .password-input-group {
+    margin-bottom: 7px;
 }
 
 .password-toggle {
@@ -2907,8 +2912,13 @@ input:focus {
     width: 100%;
 }
 
-.admin-password-group input {
+.admin-form .admin-password-group input {
     padding-right: 100px !important;
+    margin-bottom: 0;
+}
+
+.admin-password-group {
+    margin-bottom: 15px;
 }
 
 .admin-form .password-toggle {

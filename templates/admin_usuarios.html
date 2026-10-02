@@ -6,7 +6,7 @@
 {% block content %}
 <div class="admin-dashboard">
     <a class="admin-back-link" href="{{ url_for('admin_gestion') }}">← Gestión de plataforma</a>
-    <section class="admin-heading"><div><p class="learning-eyebrow">CUENTAS Y ACCESO</p><h1>Gestionar usuarios</h1><p>Crear cuentas, cambiar roles, restablecer contraseñas y archivar o restaurar accesos.</p></div></section>
+    <section class="admin-heading"><div><p class="learning-eyebrow">CUENTAS Y ACCESO</p><h1>Gestionar usuarios</h1><p>Crear cuentas, cambiar roles, restablecer contraseñas y archivar, restaurar o eliminar cuentas.</p></div></section>
     <section class="admin-students admin-form-card">
         <h2>{{ "Editar usuario" if usuario_edicion else "Agregar usuario" }}</h2>
         <form method="post" class="admin-form">
@@ -75,6 +75,11 @@
                         <button class="admin-small-button" name="accion" value="{{ 'archivar' if usuario.activo else 'restaurar' }}">
                             {{ "Archivar" if usuario.activo else "Restaurar" }}
                         </button>
+                    </form>
+                    <form method="post" onsubmit="return confirm('¿Eliminar permanentemente esta cuenta y todos sus datos asociados? Esta acción no se puede deshacer.');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+                        <button class="admin-small-button admin-delete-button" name="accion" value="eliminar">Eliminar</button>
                     </form>
                 </div>
             </article>

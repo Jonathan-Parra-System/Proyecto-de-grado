@@ -1326,6 +1326,32 @@ def admin_usuarios():
             accion = request.form.get("accion")
             usuario_id = request.form.get("usuario_id", type=int)
 
+            if accion == "eliminar":
+                if usuario_id == session["usuario_id"]:
+                    flash("No puedes eliminar tu propia cuenta de administración.", "error")
+                else:
+                    cursor.execute(
+                        "SELECT rol, activo FROM usuarios WHERE id = %s",
+                        (usuario_id,)
+                    )
+                    objetivo = cursor.fetchone()
+                    if objetivo is None:
+                        abort(404)
+                    if objetivo["rol"] == "admin" and objetivo["activo"]:
+                        cursor.execute(
+                            "SELECT COUNT(*) AS total FROM usuarios WHERE rol = 'admin' AND activo = 1"
+                        )
+                        if cursor.fetchone()["total"] <= 1:
+                            flash("No puedes eliminar al último administrador activo.", "error")
+                            return redirect(url_for("admin_usuarios"))
+                    cursor.execute("DELETE FROM usuarios WHERE id = %s", (usuario_id,))
+                    conexion.commit()
+                    flash(
+                        "La cuenta y sus datos asociados fueron eliminados.",
+                        "success",
+                    )
+                return redirect(url_for("admin_usuarios"))
+
             if accion in {"archivar", "restaurar"}:
                 if usuario_id == session["usuario_id"]:
                     flash("No puedes desactivar tu propia cuenta de administración.", "error")

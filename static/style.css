@@ -2824,6 +2824,16 @@ input:focus {
     color: #fff;
 }
 
+.admin-dashboard .admin-row-actions .admin-delete-button {
+    border-color: #a32935;
+    background: #a32935;
+}
+
+.admin-dashboard .admin-row-actions .admin-delete-button:hover {
+    border-color: #791e28;
+    background: #791e28;
+}
+
 .admin-management-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

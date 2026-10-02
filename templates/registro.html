@@ -21,6 +21,7 @@
                 <p class="login-eyebrow">COMIENZA TU CAMINO</p>
                 <h1 id="register-title">Crea tu cuenta</h1>
                 <p class="login-intro">Únete y empieza a aprender a tu propio ritmo.</p>
+                <p class="register-password-help">El registro está disponible para personas mayores de 18 años. El administrador podrá consultar estos datos de perfil para gestionar la plataforma y comunicarse contigo.</p>
 
                 {% if error %}
                     <p class="login-message login-message-error" role="alert">{{ error }}</p>
@@ -38,19 +39,83 @@
                         required
                     >
 
-                    <label for="contrasena">Contraseña</label>
+                    <label for="email">Correo electrónico</label>
                     <input
-                        type="password"
-                        id="contrasena"
-                        name="contrasena"
-                        minlength="8"
-                        maxlength="128"
-                        autocomplete="new-password"
-                        aria-describedby="password-help"
+                        type="email"
+                        id="email"
+                        name="email"
+                        maxlength="254"
+                        autocomplete="email"
+                        value="{{ email or '' }}"
                         required
                     >
+
+                    <label for="celular">Celular con prefijo internacional</label>
+                    <input
+                        type="tel"
+                        id="celular"
+                        name="celular"
+                        inputmode="tel"
+                        autocomplete="tel"
+                        placeholder="+573001234567"
+                        pattern="\+[1-9][0-9]{7,14}"
+                        value="{{ celular or '' }}"
+                        aria-describedby="celular-help"
+                        required
+                    >
+                    <p class="register-password-help" id="celular-help">
+                        Incluye el prefijo del país, por ejemplo +57 para Colombia.
+                    </p>
+
+                    <label for="genero">Género</label>
+                    <select id="genero" name="genero" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="mujer" {% if genero == 'mujer' %}selected{% endif %}>Mujer</option>
+                        <option value="hombre" {% if genero == 'hombre' %}selected{% endif %}>Hombre</option>
+                        <option value="otro" {% if genero == 'otro' %}selected{% endif %}>Otro</option>
+                        <option value="prefiero_no_decir" {% if genero == 'prefiero_no_decir' %}selected{% endif %}>Prefiero no decirlo</option>
+                    </select>
+
+                    <label for="edad">Edad</label>
+                    <input
+                        type="number"
+                        id="edad"
+                        name="edad"
+                        min="18"
+                        max="120"
+                        value="{{ edad or '' }}"
+                        required
+                    >
+
+                    <label for="fecha_nacimiento">Fecha de nacimiento</label>
+                    <input
+                        type="date"
+                        id="fecha_nacimiento"
+                        name="fecha_nacimiento"
+                        max="{{ fecha_hoy }}"
+                        value="{{ fecha_nacimiento or '' }}"
+                        required
+                    >
+
+                    <label for="contrasena">Contraseña</label>
+                    <div class="password-input-group">
+                        <input
+                            type="password"
+                            id="contrasena"
+                            name="contrasena"
+                            minlength="8"
+                            maxlength="128"
+                            autocomplete="new-password"
+                            aria-describedby="password-help"
+                            data-password-policy
+                            required
+                        >
+                        <button class="password-toggle" type="button" data-password-toggle="contrasena" aria-pressed="false">
+                            Mostrar
+                        </button>
+                    </div>
                     <p class="register-password-help" id="password-help">
-                        Usa entre 8 y 128 caracteres.
+                        Entre 8 y 128 caracteres, una mayúscula y un símbolo. No uses tres números consecutivos, como 123 o 321.
                     </p>
 
                     <button type="submit">Crear cuenta <span aria-hidden="true">→</span></button>
@@ -78,5 +143,6 @@
             </div>
         </aside>
     </main>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>

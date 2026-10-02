@@ -15,10 +15,16 @@ CREATE TABLE IF NOT EXISTS usuarios (
     usuario VARCHAR(50) NOT NULL,
     contrasena VARCHAR(255) NULL,
     contrasena_hash VARCHAR(255) NULL,
+    email VARCHAR(254) NULL,
+    celular VARCHAR(16) NULL,
+    genero VARCHAR(32) NULL,
+    edad TINYINT UNSIGNED NULL,
+    fecha_nacimiento DATE NULL,
     rol VARCHAR(20) NOT NULL DEFAULT 'estudiante',
     ultimo_inicio_sesion DATETIME NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_usuarios_usuario (usuario)
+    UNIQUE KEY uq_usuarios_usuario (usuario),
+    UNIQUE KEY uq_usuarios_email (email)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS progreso_lecciones (

@@ -352,7 +352,12 @@ form button {
 }
 
 .login-form input[type="text"],
-.login-form input[type="password"] {
+.login-form input[type="password"],
+.login-form input[type="email"],
+.login-form input[type="tel"],
+.login-form input[type="number"],
+.login-form input[type="date"],
+.login-form select {
     width: 100%;
     max-width: none;
     min-height: 52px;
@@ -376,7 +381,39 @@ form button {
     font-size: 14px;
 }
 
-.login-form button {
+.password-input-group {
+    position: relative;
+    width: 100%;
+}
+
+.login-form .password-input-group input {
+    padding-right: 100px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid #bca9ae;
+    border-radius: 6px;
+    background: #fffdf9;
+    color: var(--login-wine);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.login-form .password-toggle {
+    display: inline-flex;
+    width: auto;
+    margin: 0;
+}
+
+.login-form > button[type="submit"] {
     display: flex;
     width: 100%;
     min-height: 54px;
@@ -393,7 +430,7 @@ form button {
     font-weight: 700;
 }
 
-.login-form button:hover {
+.login-form > button[type="submit"]:hover {
     background: var(--login-magenta-dark);
 }
 
@@ -2743,6 +2780,30 @@ input:focus {
     font-size: 15px;
 }
 
+.admin-password-group {
+    width: 100%;
+}
+
+.admin-password-group input {
+    padding-right: 100px !important;
+}
+
+.admin-form .password-toggle {
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    min-height: 32px;
+    margin: 0;
+    padding: 5px 9px;
+    border: 1px solid #cbbfb2;
+    background: #fffdf9;
+    color: var(--learning-wine);
+}
+
+.admin-form .password-toggle:hover {
+    background: #f2e9d9;
+}
+
 .admin-form textarea {
     min-height: 95px;
     resize: vertical;
@@ -2778,6 +2839,19 @@ input:focus {
 .learning-page .admin-form button:hover,
 .admin-small-button:hover {
     background: var(--learning-wine);
+}
+
+.learning-page .admin-form .password-toggle {
+    display: inline-flex;
+    width: auto;
+    min-height: 32px;
+    margin: 0;
+    background: #fffdf9;
+    color: var(--learning-wine);
+}
+
+.learning-page .admin-form .password-toggle:hover {
+    background: #f2e9d9;
 }
 
 .admin-form > a {

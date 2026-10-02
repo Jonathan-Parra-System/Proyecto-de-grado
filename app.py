@@ -4,6 +4,7 @@ import json
 import re
 import secrets
 import unicodedata
+from datetime import date
 from functools import wraps
 from pathlib import Path
 
@@ -89,6 +90,74 @@ def validar_csrf():
     guardado = session.get("csrf_token", "")
     if not guardado or not hmac.compare_digest(enviado, guardado):
         abort(400)
+
+
+def _error_contrasena(contrasena):
+    if not 8 <= len(contrasena) <= 128:
+        return "La contraseña debe tener entre 8 y 128 caracteres."
+    if not any(caracter.isupper() for caracter in contrasena):
+        return "La contraseña debe incluir al menos una letra mayúscula."
+    if not any(not caracter.isalnum() and not caracter.isspace() for caracter in contrasena):
+        return "La contraseña debe incluir al menos un símbolo."
+    for inicio in range(len(contrasena) - 2):
+        secuencia = contrasena[inicio:inicio + 3]
+        if (
+            all(caracter.isdigit() for caracter in secuencia)
+            and int(secuencia[1]) - int(secuencia[0])
+            == int(secuencia[2]) - int(secuencia[1])
+            and abs(int(secuencia[1]) - int(secuencia[0])) == 1
+        ):
+            return "La contraseña no puede contener tres números consecutivos."
+    return None
+
+
+def _datos_perfil(formulario, exigir_completos=True):
+    email = formulario.get("email", "").strip().lower()
+    celular = re.sub(r"[\s().-]", "", formulario.get("celular", ""))
+    genero = formulario.get("genero", "")
+    edad_texto = formulario.get("edad", "").strip()
+    fecha_nacimiento = formulario.get("fecha_nacimiento", "").strip()
+    generos_validos = {"mujer", "hombre", "otro", "prefiero_no_decir"}
+    requeridos = [email, celular, genero, edad_texto, fecha_nacimiento]
+
+    if exigir_completos and any(not valor for valor in requeridos):
+        return None, "Completa todos los datos del perfil."
+    if not any(requeridos):
+        return {
+            "email": None,
+            "celular": None,
+            "genero": None,
+            "edad": None,
+            "fecha_nacimiento": None,
+        }, None
+    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+        return None, "Ingresa un correo electrónico válido."
+    if len(email) > 254:
+        return None, "El correo electrónico no puede superar 254 caracteres."
+    if not re.fullmatch(r"\+[1-9]\d{7,14}", celular):
+        return None, "Ingresa el celular con prefijo internacional, por ejemplo +573001234567."
+    if genero not in generos_validos:
+        return None, "Selecciona una opción válida para el género."
+    if not edad_texto.isdigit() or not 18 <= int(edad_texto) <= 120:
+        return None, "Debes tener entre 18 y 120 años para registrarte."
+    try:
+        nacimiento = date.fromisoformat(fecha_nacimiento)
+    except ValueError:
+        return None, "Ingresa una fecha de nacimiento válida."
+    if nacimiento > date.today():
+        return None, "La fecha de nacimiento no puede estar en el futuro."
+    edad_calculada = date.today().year - nacimiento.year - (
+        (date.today().month, date.today().day) < (nacimiento.month, nacimiento.day)
+    )
+    if int(edad_texto) != edad_calculada:
+        return None, "La edad debe coincidir con la fecha de nacimiento."
+    return {
+        "email": email,
+        "celular": celular,
+        "genero": genero,
+        "edad": int(edad_texto),
+        "fecha_nacimiento": nacimiento,
+    }, None
 
 
 def _serializar(valor):
@@ -333,17 +402,24 @@ def registro():
         usuario = request.form.get("usuario", "").strip()
         contrasena = request.form.get("contrasena", "")
 
+        perfil, error_perfil = _datos_perfil(request.form)
         if not usuario or len(usuario) > 50:
+            error = "El usuario debe tener entre 1 y 50 caracteres."
+        elif error_perfil:
+            error = error_perfil
+        else:
+            error = _error_contrasena(contrasena)
+        if error:
             return render_template(
                 "registro.html",
-                error="El usuario debe tener entre 1 y 50 caracteres.",
-                usuario=usuario
-            )
-        if len(contrasena) < 8 or len(contrasena) > 128:
-            return render_template(
-                "registro.html",
-                error="La contraseña debe tener entre 8 y 128 caracteres.",
-                usuario=usuario
+                error=error,
+                usuario=usuario,
+                email=request.form.get("email", "").strip(),
+                celular=request.form.get("celular", "").strip(),
+                genero=request.form.get("genero", ""),
+                edad=request.form.get("edad", "").strip(),
+                fecha_nacimiento=request.form.get("fecha_nacimiento", ""),
+                fecha_hoy=date.today().isoformat(),
             )
 
         conexion = conectar_db()
@@ -351,19 +427,44 @@ def registro():
         try:
             cursor.execute(
                 """
-                INSERT INTO usuarios (usuario, contrasena_hash)
-                VALUES (%s, %s)
+                INSERT INTO usuarios
+                    (usuario, contrasena_hash, email, celular, genero, edad, fecha_nacimiento)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (usuario, generate_password_hash(contrasena))
+                (
+                    usuario,
+                    generate_password_hash(contrasena),
+                    perfil["email"],
+                    perfil["celular"],
+                    perfil["genero"],
+                    perfil["edad"],
+                    perfil["fecha_nacimiento"],
+                )
             )
             conexion.commit()
         except mysql.connector.IntegrityError as error:
             conexion.rollback()
             if error.errno == 1062:
+                cursor.execute(
+                    "SELECT usuario, email FROM usuarios WHERE usuario = %s OR email = %s",
+                    (usuario, perfil["email"])
+                )
+                existentes = cursor.fetchall()
+                mensaje = (
+                    "Ese nombre de usuario ya está registrado."
+                    if any(fila[0] == usuario for fila in existentes)
+                    else "Ese correo electrónico ya está registrado."
+                )
                 return render_template(
                     "registro.html",
-                    error="Ese nombre de usuario ya está registrado.",
-                    usuario=usuario
+                    error=mensaje,
+                    usuario=usuario,
+                    email=request.form.get("email", "").strip(),
+                    celular=request.form.get("celular", "").strip(),
+                    genero=request.form.get("genero", ""),
+                    edad=request.form.get("edad", "").strip(),
+                    fecha_nacimiento=request.form.get("fecha_nacimiento", ""),
+                    fecha_hoy=date.today().isoformat(),
                 )
             raise
         finally:
@@ -372,7 +473,7 @@ def registro():
 
         return redirect(url_for("login", registrado="1"))
 
-    return render_template("registro.html")
+    return render_template("registro.html", fecha_hoy=date.today().isoformat())
 
 @app.route('/panel')
 @estudiante_requerido
@@ -821,12 +922,15 @@ def admin_usuarios():
             rol = request.form.get("rol", "")
             activo = request.form.get("activo") == "1"
             contrasena = request.form.get("contrasena", "")
+            perfil, error_perfil = _datos_perfil(request.form, exigir_completos=False)
             if not nombre or len(nombre) > 50 or rol not in {"estudiante", "admin"}:
                 flash("Ingresa un usuario de hasta 50 caracteres y un rol válido.", "error")
-            elif contrasena and not 8 <= len(contrasena) <= 128:
-                flash("La contraseña debe tener entre 8 y 128 caracteres.", "error")
+            elif error_perfil:
+                flash(error_perfil, "error")
+            elif contrasena and _error_contrasena(contrasena):
+                flash(_error_contrasena(contrasena), "error")
             elif accion == "crear" and not contrasena:
-                flash("Para crear la cuenta debes indicar una contraseña de al menos 8 caracteres.", "error")
+                flash("Para crear la cuenta debes indicar una contraseña válida.", "error")
             else:
                 if usuario_id:
                     cursor.execute("SELECT rol, activo FROM usuarios WHERE id = %s", (usuario_id,))
@@ -848,16 +952,21 @@ def admin_usuarios():
                         if cursor.fetchone()["total"] <= 1:
                             flash("Debe permanecer al menos una cuenta administradora activa.", "error")
                         else:
-                            _guardar_usuario(cursor, conexion, usuario_id, nombre, rol, activo, contrasena)
+                            _guardar_usuario(cursor, conexion, usuario_id, nombre, rol, activo, contrasena, perfil)
                     else:
-                        _guardar_usuario(cursor, conexion, usuario_id, nombre, rol, activo, contrasena)
+                        _guardar_usuario(cursor, conexion, usuario_id, nombre, rol, activo, contrasena, perfil)
                 else:
                     cursor.execute(
                         """
-                        INSERT INTO usuarios (usuario, contrasena_hash, rol, activo)
-                        VALUES (%s, %s, %s, %s)
+                        INSERT INTO usuarios
+                            (usuario, contrasena_hash, rol, activo, email, celular, genero, edad, fecha_nacimiento)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """,
-                        (nombre, generate_password_hash(contrasena), rol, int(activo))
+                        (
+                            nombre, generate_password_hash(contrasena), rol, int(activo),
+                            perfil["email"], perfil["celular"], perfil["genero"],
+                            perfil["edad"], perfil["fecha_nacimiento"],
+                        )
                     )
                     conexion.commit()
                 return redirect(url_for("admin_usuarios"))
@@ -865,7 +974,10 @@ def admin_usuarios():
         editar_id = request.args.get("editar", type=int)
         if editar_id:
             cursor.execute(
-                "SELECT id, usuario, rol, activo FROM usuarios WHERE id = %s",
+                """
+                SELECT id, usuario, rol, activo, email, celular, genero, edad, fecha_nacimiento
+                FROM usuarios WHERE id = %s
+                """,
                 (editar_id,)
             )
             usuario_edicion = cursor.fetchone()
@@ -873,7 +985,8 @@ def admin_usuarios():
                 abort(404)
         cursor.execute(
             """
-            SELECT id, usuario, rol, activo, ultimo_inicio_sesion
+            SELECT id, usuario, rol, activo, ultimo_inicio_sesion,
+                   email, celular, genero, edad, fecha_nacimiento
             FROM usuarios
             ORDER BY activo DESC, rol, usuario
             """
@@ -882,10 +995,18 @@ def admin_usuarios():
     except mysql.connector.IntegrityError as error:
         conexion.rollback()
         if error.errno == 1062:
-            flash("Ese nombre de usuario ya está en uso.", "error")
+            correo_enviado = request.form.get("email", "").strip().lower()
+            cursor.execute("SELECT email FROM usuarios WHERE email = %s", (correo_enviado,))
+            flash(
+                "Ese correo electrónico ya está en uso."
+                if correo_enviado and cursor.fetchone()
+                else "Ese nombre de usuario ya está en uso.",
+                "error",
+            )
             cursor.execute(
                 """
-                SELECT id, usuario, rol, activo, ultimo_inicio_sesion
+                SELECT id, usuario, rol, activo, ultimo_inicio_sesion,
+                       email, celular, genero, edad, fecha_nacimiento
                 FROM usuarios
                 ORDER BY activo DESC, rol, usuario
                 """
@@ -900,28 +1021,38 @@ def admin_usuarios():
         "admin_usuarios.html",
         usuarios=usuarios,
         usuario_edicion=usuario_edicion,
+        fecha_hoy=date.today().isoformat(),
     )
 
 
-def _guardar_usuario(cursor, conexion, usuario_id, nombre, rol, activo, contrasena):
+def _guardar_usuario(cursor, conexion, usuario_id, nombre, rol, activo, contrasena, perfil):
     if contrasena:
         cursor.execute(
             """
             UPDATE usuarios
             SET usuario = %s, rol = %s, activo = %s, contrasena_hash = %s,
-                contrasena = NULL
+                contrasena = NULL, email = %s, celular = %s, genero = %s,
+                edad = %s, fecha_nacimiento = %s
             WHERE id = %s
             """,
-            (nombre, rol, int(activo), generate_password_hash(contrasena), usuario_id)
+            (
+                nombre, rol, int(activo), generate_password_hash(contrasena),
+                perfil["email"], perfil["celular"], perfil["genero"], perfil["edad"],
+                perfil["fecha_nacimiento"], usuario_id,
+            )
         )
     else:
         cursor.execute(
             """
             UPDATE usuarios
-            SET usuario = %s, rol = %s, activo = %s
+            SET usuario = %s, rol = %s, activo = %s, email = %s, celular = %s,
+                genero = %s, edad = %s, fecha_nacimiento = %s
             WHERE id = %s
             """,
-            (nombre, rol, int(activo), usuario_id)
+            (
+                nombre, rol, int(activo), perfil["email"], perfil["celular"],
+                perfil["genero"], perfil["edad"], perfil["fecha_nacimiento"], usuario_id,
+            )
         )
     conexion.commit()
 

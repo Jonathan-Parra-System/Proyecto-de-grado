@@ -17,9 +17,24 @@
             <select id="usuario-rol" name="rol"><option value="estudiante" {% if not usuario_edicion or usuario_edicion.rol == 'estudiante' %}selected{% endif %}>Estudiante</option><option value="admin" {% if usuario_edicion and usuario_edicion.rol == 'admin' %}selected{% endif %}>Administrador</option></select>
             <label for="usuario-activo">Acceso</label>
             <select id="usuario-activo" name="activo"><option value="1" {% if not usuario_edicion or usuario_edicion.activo %}selected{% endif %}>Activo</option><option value="0" {% if usuario_edicion and not usuario_edicion.activo %}selected{% endif %}>Archivado</option></select>
+            <label for="usuario-email">Correo electrónico</label><input id="usuario-email" type="email" name="email" maxlength="254" autocomplete="email" value="{{ usuario_edicion.email or '' if usuario_edicion else '' }}">
+            <label for="usuario-celular">Celular con prefijo internacional</label><input id="usuario-celular" type="tel" name="celular" placeholder="+573001234567" value="{{ usuario_edicion.celular or '' if usuario_edicion else '' }}">
+            <label for="usuario-genero">Género</label>
+            <select id="usuario-genero" name="genero">
+                <option value="">Sin especificar</option>
+                <option value="mujer" {% if usuario_edicion and usuario_edicion.genero == 'mujer' %}selected{% endif %}>Mujer</option>
+                <option value="hombre" {% if usuario_edicion and usuario_edicion.genero == 'hombre' %}selected{% endif %}>Hombre</option>
+                <option value="otro" {% if usuario_edicion and usuario_edicion.genero == 'otro' %}selected{% endif %}>Otro</option>
+                <option value="prefiero_no_decir" {% if usuario_edicion and usuario_edicion.genero == 'prefiero_no_decir' %}selected{% endif %}>Prefiero no decirlo</option>
+            </select>
+            <label for="usuario-edad">Edad</label><input id="usuario-edad" type="number" name="edad" min="18" max="120" value="{{ usuario_edicion.edad or '' if usuario_edicion else '' }}">
+            <label for="usuario-fecha-nacimiento">Fecha de nacimiento</label><input id="usuario-fecha-nacimiento" type="date" name="fecha_nacimiento" max="{{ fecha_hoy }}" value="{{ usuario_edicion.fecha_nacimiento or '' if usuario_edicion else '' }}">
             <label for="usuario-contrasena">{% if usuario_edicion %}Nueva contraseña (opcional){% else %}Contraseña inicial{% endif %}</label>
-            <input id="usuario-contrasena" type="password" name="contrasena" minlength="8" maxlength="128" autocomplete="new-password" {% if not usuario_edicion %}required{% endif %}>
-            <p class="admin-form-help">{% if usuario_edicion %}Déjala vacía para conservar la contraseña actual.{% else %}Debe tener entre 8 y 128 caracteres. La contraseña se guarda con hash.{% endif %}</p>
+            <div class="password-input-group admin-password-group">
+                <input id="usuario-contrasena" type="password" name="contrasena" minlength="8" maxlength="128" autocomplete="new-password" data-password-policy {% if not usuario_edicion %}required{% endif %}>
+                <button class="password-toggle" type="button" data-password-toggle="usuario-contrasena" aria-pressed="false">Mostrar</button>
+            </div>
+            <p class="admin-form-help">{% if usuario_edicion %}Déjala vacía para conservar la contraseña actual.{% else %}Debe tener entre 8 y 128 caracteres.{% endif %} Incluye una mayúscula y un símbolo; no uses tres números consecutivos. Se guarda con hash.</p>
             <button name="accion" value="{{ 'guardar' if usuario_edicion else 'crear' }}">{{ "Guardar cambios" if usuario_edicion else "Crear usuario" }}</button>
             {% if usuario_edicion %}<a href="{{ url_for('admin_usuarios') }}">Cancelar edición</a>{% endif %}
         </form>
@@ -32,6 +47,15 @@
                 <div class="admin-user-info">
                     <h3>{{ usuario.usuario }}</h3>
                     <p>{{ "Administrador" if usuario.rol == "admin" else "Estudiante" }} · {{ "Activo" if usuario.activo else "Archivado" }}</p>
+                    {% if usuario.email %}<span class="admin-muted">Correo: <a href="mailto:{{ usuario.email }}">{{ usuario.email }}</a></span>{% endif %}
+                    {% if usuario.celular %}<span class="admin-muted">Celular: <a href="tel:{{ usuario.celular }}">{{ usuario.celular }}</a></span>{% endif %}
+                    {% if usuario.genero or usuario.edad or usuario.fecha_nacimiento %}
+                    <span class="admin-muted">
+                        {% if usuario.genero %}{{ usuario.genero.replace('_', ' ')|title }}{% endif %}
+                        {% if usuario.edad %} · {{ usuario.edad }} años{% endif %}
+                        {% if usuario.fecha_nacimiento %} · Nacimiento: {{ usuario.fecha_nacimiento.strftime("%d/%m/%Y") }}{% endif %}
+                    </span>
+                    {% endif %}
                     <span class="admin-muted">
                         {% if usuario.ultimo_inicio_sesion %}
                             Último acceso: {{ usuario.ultimo_inicio_sesion.strftime("%d/%m/%Y %H:%M") }}

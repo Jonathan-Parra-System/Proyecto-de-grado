@@ -228,6 +228,7 @@ form button {
 }
 
 .login-header {
+    position: relative;
     min-height: 68px;
     padding: 0 5.5%;
     display: flex;
@@ -855,6 +856,35 @@ form button {
     color: var(--learning-beige-light);
 }
 
+.site-header-content {
+    position: relative;
+    width: min(1120px, 100%);
+    min-height: 96px;
+    margin: 0 auto;
+    padding: 0 215px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.site-header-copy {
+    text-align: center;
+}
+
+.uts-header-logo {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: min(190px, 24vw);
+    height: auto;
+    max-height: 116px;
+    padding: 5px;
+    transform: translateY(-50%);
+    border-radius: 8px;
+    background: #fff;
+    object-fit: contain;
+}
+
 .learning-page header h1 {
     color: var(--learning-beige-light);
     font-family: Georgia, serif;
@@ -946,10 +976,14 @@ form button {
 }
 
 .learning-page .home-site-header {
-    padding: 21px 24px;
+    padding: 10px 24px;
     background: var(--home-wine);
     color: var(--home-paper);
     text-align: center;
+}
+
+.learning-page .home-site-header .site-header-content {
+    min-height: 112px;
 }
 
 .learning-page .home-site-header h1 {
@@ -963,6 +997,52 @@ form button {
     margin: 0;
     color: var(--home-beige);
     font-size: 15px;
+}
+
+.site-footer {
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto 24px;
+    padding: 18px 20px;
+    border-top: 1px solid #d9cdbd;
+    color: #51494b;
+    text-align: center;
+}
+
+.site-footer p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.site-footer a {
+    color: var(--learning-wine, #61283f);
+    font-weight: 700;
+}
+
+.login-header-copy {
+    display: grid;
+    gap: 4px;
+    justify-items: start;
+}
+
+.login-header .uts-header-logo {
+    right: 5.5%;
+}
+
+.login-site-footer {
+    width: 100%;
+    margin: 0;
+    padding: 18px 5.5%;
+    border-top: 0;
+    background: var(--login-wine);
+    color: var(--login-beige);
+}
+
+.login-site-footer p {
+    color: var(--login-beige);
+}
+
+.login-site-footer a {
+    color: #fff;
 }
 
 .learning-page .home-nav {
@@ -2341,7 +2421,13 @@ input:focus {
 
     .login-header {
         min-height: 60px;
-        padding: 0 20px;
+        padding: 0 110px 0 20px;
+    }
+
+    .login-header .uts-header-logo {
+        right: 16px;
+        width: 82px;
+        max-height: 52px;
     }
 
     .login-brand {
@@ -2350,6 +2436,43 @@ input:focus {
 
     .login-header-caption {
         display: none;
+    }
+
+    .site-header-content {
+        min-height: 80px;
+        padding: 0 78px 0 0;
+    }
+
+    .uts-header-logo {
+        right: 0;
+        width: 72px;
+        max-height: 48px;
+        padding: 3px;
+    }
+
+    .learning-page .home-site-header {
+        padding: 6px 12px;
+    }
+
+    .learning-page .home-site-header .site-header-content {
+        min-height: 82px;
+    }
+
+    .learning-page .home-site-header h1 {
+        font-size: 22px;
+    }
+
+    .learning-page .home-site-header p {
+        font-size: 12px;
+    }
+
+    .site-footer {
+        width: calc(100% - 24px);
+        padding: 14px 8px;
+    }
+
+    .site-footer p {
+        font-size: 13px;
     }
 
     .login-layout {

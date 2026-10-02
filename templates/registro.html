@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear cuenta | Plataforma Educativa</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-jpa.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="login-page">
     <header class="login-header">
-        <a class="login-brand" href="{{ url_for('inicio') }}">
-            <span class="login-brand-icon" aria-hidden="true">▰</span>
-            <span>Plataforma Educativa</span>
-        </a>
-        <span class="login-header-caption">Aprende a tu ritmo</span>
+        <div class="login-header-copy">
+            <a class="login-brand" href="{{ url_for('inicio') }}">
+                <span class="login-brand-icon" aria-hidden="true">▰</span>
+                <span>Plataforma Educativa</span>
+            </a>
+            <span class="login-header-caption">Aprende a tu ritmo</span>
+        </div>
+        <img class="uts-header-logo" src="{{ url_for('static', filename='images/uts-logo.png') }}" alt="Unidades Tecnológicas de Santander, UTS" width="1287" height="768">
     </header>
 
     <main class="login-layout">
@@ -143,6 +148,9 @@
             </div>
         </aside>
     </main>
+    <footer class="site-footer login-site-footer">
+        <p>© 2026 Jonathan Parra · Bucaramanga, Santander, Colombia · Celular: <a href="tel:3238157772">3238157772</a></p>
+    </footer>
     <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>

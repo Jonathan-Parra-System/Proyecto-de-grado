@@ -1,0 +1,40 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+    <head> 
+        <meta charset="UTF-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <title>{% block title %}Plataforma Educativa{% endblock %}</title> 
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+    </head> 
+    <body class="learning-page {% block page_class %}{% endblock %}"> 
+        <header class="{% block header_class %}{% endblock %}"> 
+            <h1>Plataforma Educativa</h1>
+            <p>Aprende tecnología de manera sencilla</p> 
+        </header> 
+        <nav class="{% block nav_class %}{% if session.get('rol') == 'admin' %}admin-navigation{% endif %}{% endblock %}"> 
+            {% block navigation %}
+            <a href="{{ url_for('inicio') }}">Inicio</a>
+            {% if session.get('rol') == 'admin' %}
+            <a href="{{ url_for('admin_gestion') }}">Gestionar contenido</a>
+            <a href="{{ url_for('admin_usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+            {% else %}
+            <a href="{{ url_for('panel') }}">Panel</a>
+            <a href="{{ url_for('progreso') }}">Mi progreso</a>
+            {% if session.get('usuario_id') %}
+            <a href="{{ url_for('evaluacion') }}">Evaluaciones</a>
+            <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+            {% endif %}
+            {% endif %}
+            {% endblock %}
+        </nav> 
+        <main class="{% block main_class %}{% endblock %}">
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+                {% for categoria, mensaje in mensajes %}
+                    <p class="flash-message flash-{{ categoria }}" role="{{ 'alert' if categoria == 'error' else 'status' }}">{{ mensaje }}</p>
+                {% endfor %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main> 
+    </body> 
+    </html>

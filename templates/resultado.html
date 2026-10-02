@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado | Plataforma Educativa{% endblock %}
+{% block content %}
+<section class="result-card" aria-labelledby="result-title">
+    <p class="result-eyebrow">EVALUACIÓN COMPLETADA</p>
+    <h1 id="result-title">{% if evaluacion %}{{ evaluacion.titulo }} · v{{ evaluacion.version }}{% else %}Tu resultado{% endif %}</h1>
+    <p class="result-label">Obtuviste</p>
+    <p class="result-score">{{ puntos }} <span>/ {{ total_preguntas or 3 }}</span></p>
+    {% if puntos == (total_preguntas or 3) %}
+        <p class="result-feedback">¡Excelente! Respondiste todas las preguntas correctamente.</p>
+    {% elif puntos >= ((total_preguntas or 3) * 0.67)|round(0, 'ceil')|int %}
+        <p class="result-feedback">¡Muy bien! Solo necesitas repasar un poco.</p>
+    {% else %}
+        <p class="result-feedback">Te recomendamos volver a estudiar el contenido e intentarlo de nuevo.</p>
+    {% endif %}
+    <a class="result-return" href="{{ url_for('panel') }}">Volver al panel <span aria-hidden="true">→</span></a>
+</section>
+{% endblock %}

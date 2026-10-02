@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel principal | Plataforma Educativa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="panel-page">
+    <header class="panel-header">
+        <a class="panel-brand" href="{{ url_for('panel') }}">
+            <span class="panel-brand-icon" aria-hidden="true">▰</span>
+            <span>Plataforma Educativa</span>
+        </a>
+        <a class="panel-logout" href="{{ url_for('logout') }}">Cerrar sesión</a>
+    </header>
+
+    <main class="panel-main">
+        <section class="panel-welcome" aria-labelledby="welcome-title">
+            <p class="panel-eyebrow">TU ESPACIO DE APRENDIZAJE</p>
+            <h1 id="welcome-title">¡Hola, {{ usuario }}! <span aria-hidden="true">👋</span></h1>
+            <p>Continúa aprendiendo. Cada paso que das te acerca a nuevas oportunidades.</p>
+        </section>
+
+        <section class="panel-courses" aria-labelledby="courses-title">
+            <div class="panel-section-heading">
+                <div>
+                    <p class="panel-eyebrow">EXPLORA Y APRENDE</p>
+                    <h2 id="courses-title">Mis cursos</h2>
+                </div>
+                <span class="panel-course-count">{{ cursos|length }} cursos</span>
+            </div>
+
+            <div class="panel-course-grid">
+                {% for slug, curso in cursos.items() %}
+                    <article class="panel-course-card{% if loop.first %} panel-course-card-featured{% endif %}">
+                        <span class="panel-course-number">{{ "%02d"|format(loop.index) }}</span>
+                        <div class="panel-course-symbol" aria-hidden="true">{% if loop.index == 1 %}⌘{% elif loop.index == 2 %}◎{% else %}✦{% endif %}</div>
+                        <h3>{{ curso.titulo }}</h3>
+                        <p>{{ curso.descripcion }}</p>
+                        <a class="panel-course-link" href="{{ url_for('curso', course_slug=slug) }}">Entrar al curso <span aria-hidden="true">→</span></a>
+                    </article>
+                {% else %}
+                    <p class="admin-empty-state">Aún no hay cursos disponibles.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="panel-progress" aria-labelledby="progress-title">
+            <div class="panel-progress-copy">
+                <p class="panel-eyebrow">SIGUE AVANZANDO</p>
+                <h2 id="progress-title">Mi progreso</h2>
+                <p>Has completado <strong>{{ lecciones_completadas }} de {{ total_lecciones }} lecciones</strong>.</p>
+                <a class="panel-progress-link" href="{{ url_for('progreso') }}">Ver mi progreso <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="panel-progress-meter" role="img" aria-label="Progreso general: {{ porcentaje }} por ciento">
+                <div class="panel-progress-track">
+                    <div class="panel-progress-fill" style="width: {{ porcentaje }}%;"></div>
+                </div>
+                <strong>{{ porcentaje }}%</strong>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

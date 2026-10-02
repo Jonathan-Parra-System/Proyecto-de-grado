@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-labelledby="title desc">
+  <title id="title">Archivos organizados en carpetas</title>
+  <desc id="desc">Ilustración de documentos y carpetas organizados.</desc>
+  <rect width="480" height="320" rx="28" fill="#f2e9d9"/>
+  <circle cx="90" cy="72" r="29" fill="#e2ece4"/>
+  <path d="M83 70h14m-7-7v14" stroke="#397568" stroke-width="5" stroke-linecap="round"/>
+  <path d="M90 141h116l22 21h166v105H90z" fill="#397568"/>
+  <path d="M90 162h304v105H90z" fill="#6b9c8e"/>
+  <rect x="134" y="74" width="112" height="139" rx="10" fill="#fbf8f1" stroke="#61283f" stroke-width="6"/>
+  <path d="M156 107h67m-67 23h67m-67 23h50" stroke="#d9cbbb" stroke-width="8" stroke-linecap="round"/>
+  <path d="M215 92h91l29 29v91H215z" fill="#fbf8f1" stroke="#a83f78" stroke-width="6"/>
+  <path d="M306 93v30h29" fill="none" stroke="#a83f78" stroke-width="6"/>
+  <path d="M235 147h76m-76 20h65m-65 20h50" stroke="#d9cbbb" stroke-width="7" stroke-linecap="round"/>
+  <rect x="346" y="61" width="68" height="69" rx="15" fill="#a83f78"/>
+  <path d="M363 83h34m-34 14h34m-34 14h24" stroke="#fbf8f1" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="395" cy="230" r="13" fill="#f2e9d9"/>
+</svg>

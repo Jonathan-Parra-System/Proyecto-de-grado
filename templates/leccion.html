@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ leccion.titulo }} | Plataforma Educativa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="learning-page">
+    <header class="lesson-header">
+        <a class="lesson-back-link" href="{{ url_for('curso', course_slug=course_slug) }}">← Módulos</a>
+        <div class="lesson-header-copy">
+            <p class="course-kicker">{{ leccion.modulo }}</p>
+            <h1>{{ leccion.titulo }}</h1>
+            <p>Lección {{ numero }} de {{ total }} <span aria-hidden="true">·</span> {{ leccion.duracion }}</p>
+        </div>
+        <div class="lesson-progress-track" role="img" aria-label="Lección {{ numero }} de {{ total }}">
+            <span style="width: {{ (numero / total * 100)|int }}%;"></span>
+        </div>
+    </header>
+
+    <main class="lesson-main">
+        <section class="lesson-hero" aria-labelledby="lesson-intro-title">
+            <div class="lesson-hero-copy">
+                <p class="learning-eyebrow">APRENDE Y PRACTICA</p>
+                <h2 id="lesson-intro-title">{{ leccion.titulo }}</h2>
+                <p>{{ leccion.introduccion }}</p>
+            </div>
+            <img
+                class="lesson-illustration"
+                src="{{ url_for('static', filename='images/' ~ leccion.imagen) }}"
+                alt="Ilustración relacionada con {{ leccion.titulo }}"
+            >
+        </section>
+
+        <section class="lesson-objectives" aria-labelledby="objectives-title">
+            <h2 id="objectives-title">Al terminar podrás</h2>
+            <ul>
+                {% for objetivo in leccion.objetivos %}
+                    <li><span aria-hidden="true">✓</span>{{ objetivo }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="lesson-steps" aria-labelledby="steps-title">
+            <div class="lesson-section-heading">
+                <p class="learning-eyebrow">CONTENIDO DE LA LECCIÓN</p>
+                <h2 id="steps-title">Vamos paso a paso</h2>
+            </div>
+            <div class="lesson-step-grid">
+                {% for paso in leccion.pasos %}
+                    <article class="lesson-step-card">
+                        <span class="lesson-step-number">{{ "%02d"|format(loop.index) }}</span>
+                        <h3>{{ paso.titulo }}</h3>
+                        <p>{{ paso.texto }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="lesson-activity" aria-labelledby="activity-title">
+            <div class="lesson-activity-heading">
+                <span class="lesson-activity-icon" aria-hidden="true">✦</span>
+                <div>
+                    <p class="learning-eyebrow">PON A PRUEBA LO APRENDIDO</p>
+                    <h2 id="activity-title">Actividad rápida</h2>
+                </div>
+            </div>
+
+            {% if resultado_actividad and resultado_actividad.correcta %}
+                <p class="lesson-success" role="status">¡Muy bien! Actividad completada y avance guardado en tu cuenta.</p>
+            {% elif resultado_actividad %}
+                <p class="lesson-error" role="alert">Esa respuesta no es correcta. La respuesta correcta está marcada; inténtalo de nuevo.</p>
+            {% elif completada %}
+                <p class="lesson-success" role="status">¡Muy bien! Esta actividad ya está completada y tu avance está guardado en tu cuenta.</p>
+            {% endif %}
+
+            <form class="lesson-activity-form" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <fieldset>
+                    <legend>{{ leccion.actividad.pregunta }}</legend>
+                    {% for valor, etiqueta in leccion.actividad.opciones %}
+                        {% set es_respuesta_correcta = valor == leccion.actividad.respuesta %}
+                        {% set es_seleccionada = resultado_actividad and valor == resultado_actividad.respuesta %}
+                        <label class="lesson-answer{% if resultado_actividad and es_respuesta_correcta %} lesson-answer-correct{% elif es_seleccionada %} lesson-answer-incorrect{% endif %}">
+                            <input type="radio" name="respuesta" value="{{ valor }}" {% if es_seleccionada %}checked{% endif %} required>
+                            <span>{{ etiqueta }}</span>
+                            {% if resultado_actividad and es_respuesta_correcta %}
+                                <span class="lesson-answer-feedback" aria-label="Respuesta correcta">✓ <span class="lesson-answer-feedback-text">Correcta</span></span>
+                            {% elif es_seleccionada %}
+                                <span class="lesson-answer-feedback" aria-label="Respuesta incorrecta">✗ <span class="lesson-answer-feedback-text">Tu respuesta</span></span>
+                            {% endif %}
+                        </label>
+                    {% endfor %}
+                </fieldset>
+                <button type="submit">Comprobar respuesta <span aria-hidden="true">→</span></button>
+            </form>
+        </section>
+
+        <nav class="lesson-navigation" aria-label="Navegación entre lecciones">
+            {% if anterior %}
+                <a class="lesson-nav-secondary" href="{{ url_for('leccion', slug=anterior) }}">← Lección anterior</a>
+            {% else %}
+                <a class="lesson-nav-secondary" href="{{ url_for('curso', course_slug=course_slug) }}">← Ver módulos</a>
+            {% endif %}
+            {% if siguiente %}
+                <a class="lesson-nav-primary" href="{{ url_for('leccion', slug=siguiente) }}">Siguiente lección →</a>
+            {% else %}
+                <a class="lesson-nav-primary" href="{{ url_for('progreso') }}">Ver mi progreso →</a>
+            {% endif %}
+        </nav>
+    </main>
+</body>
+</html>

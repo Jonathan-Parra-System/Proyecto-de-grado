@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Mi progreso | Plataforma Educativa{% endblock %}
+{% block page_class %}progress-page{% endblock %}
+{% block main_class %}progress-main{% endblock %}
+
+{% block content %}
+
+<p class="learning-eyebrow">TU CAMINO DE APRENDIZAJE</p>
+<h1>Mi progreso</h1>
+<p>Aquí puedes consultar tu avance en cada curso.</p>
+
+<section class="progreso progreso-general" aria-labelledby="progress-overall-title">
+    <div class="progress-card-heading">
+        <div>
+            <p class="learning-eyebrow">RESUMEN GENERAL</p>
+            <h2 id="progress-overall-title">Todos tus cursos</h2>
+        </div>
+        <strong class="progress-percent">{{ porcentaje }}%</strong>
+    </div>
+    <p class="progress-count">Lecciones completadas: <strong>{{ completadas }} / {{ total_lecciones }}</strong></p>
+    <div class="barra-progreso" role="img" aria-label="Progreso general: {{ porcentaje }} por ciento">
+        <div class="progreso-completado" style="width: {{ porcentaje }}%;"></div>
+    </div>
+</section>
+
+<div class="progress-course-grid">
+    {% for curso in progreso_cursos %}
+        <section class="progreso progress-course-card" aria-labelledby="progress-course-{{ loop.index }}">
+            <p class="learning-eyebrow">CURSO {{ "%02d"|format(loop.index) }}</p>
+            <div class="progress-card-heading">
+                <h2 id="progress-course-{{ loop.index }}">{{ curso.titulo }}</h2>
+                <strong class="progress-percent">{{ curso.porcentaje }}%</strong>
+            </div>
+            <p class="progress-count">Lecciones completadas: <strong>{{ curso.completadas }} / {{ curso.total }}</strong></p>
+            <div class="barra-progreso" role="img" aria-label="{{ curso.titulo }}: {{ curso.porcentaje }} por ciento">
+                <div class="progreso-completado" style="width: {{ curso.porcentaje }}%;"></div>
+            </div>
+            <a class="progress-course-link" href="{{ url_for('curso', course_slug=curso.slug) }}">Ir al curso <span aria-hidden="true">→</span></a>
+        </section>
+    {% endfor %}
+</div>
+
+<a href="{{ url_for('panel') }}"><button>Volver al panel</button></a>
+
+{% endblock %}

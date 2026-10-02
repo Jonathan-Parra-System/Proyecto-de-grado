@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-labelledby="title desc">
+  <title id="title">Navegación segura por Internet</title>
+  <desc id="desc">Ilustración de una ventana de navegador y conexiones de red.</desc>
+  <rect width="480" height="320" rx="28" fill="#e4eee6"/>
+  <circle cx="389" cy="67" r="36" fill="#f2e9d9"/>
+  <path d="M72 221c31-52 70-78 117-78s82 33 117 33 64-20 102-63" fill="none" stroke="#6b9c8e" stroke-width="9" stroke-linecap="round" stroke-dasharray="3 16"/>
+  <rect x="89" y="68" width="246" height="173" rx="15" fill="#fbf8f1" stroke="#61283f" stroke-width="8"/>
+  <path d="M93 107h238" stroke="#61283f" stroke-width="8"/>
+  <circle cx="115" cy="88" r="6" fill="#a83f78"/>
+  <circle cx="137" cy="88" r="6" fill="#397568"/>
+  <circle cx="159" cy="88" r="6" fill="#d9cbbb"/>
+  <rect x="118" y="128" width="187" height="25" rx="12" fill="#e9f0e8"/>
+  <circle cx="135" cy="140" r="6" fill="#397568"/>
+  <path d="M154 140h126" stroke="#9bafa5" stroke-width="6" stroke-linecap="round"/>
+  <rect x="119" y="171" width="80" height="48" rx="8" fill="#a83f78"/>
+  <path d="M211 179h79m-79 14h66m-66 14h53" stroke="#d6cbb9" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="380" cy="209" r="43" fill="#397568"/>
+  <path d="M354 208c10-20 42-20 52 0m-42 14c7-10 25-10 32 0m-18 14h4" fill="none" stroke="#fbf8f1" stroke-width="6" stroke-linecap="round"/>
+  <path d="M385 49v-14m-13 5 13-13 13 13" fill="none" stroke="#a83f78" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

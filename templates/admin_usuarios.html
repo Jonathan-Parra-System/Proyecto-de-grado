@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios | Administración{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <a class="admin-back-link" href="{{ url_for('admin_gestion') }}">← Gestión de plataforma</a>
+    <section class="admin-heading"><div><p class="learning-eyebrow">CUENTAS Y ACCESO</p><h1>Gestionar usuarios</h1><p>Crear cuentas, cambiar roles, restablecer contraseñas y archivar o restaurar accesos.</p></div></section>
+    <section class="admin-students admin-form-card">
+        <h2>{{ "Editar usuario" if usuario_edicion else "Agregar usuario" }}</h2>
+        <form method="post" class="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% if usuario_edicion %}<input type="hidden" name="usuario_id" value="{{ usuario_edicion.id }}">{% endif %}
+            <label for="usuario-nombre">Nombre de usuario</label><input id="usuario-nombre" name="usuario" maxlength="50" autocomplete="off" required value="{{ usuario_edicion.usuario if usuario_edicion else '' }}">
+            <label for="usuario-rol">Rol</label>
+            <select id="usuario-rol" name="rol"><option value="estudiante" {% if not usuario_edicion or usuario_edicion.rol == 'estudiante' %}selected{% endif %}>Estudiante</option><option value="admin" {% if usuario_edicion and usuario_edicion.rol == 'admin' %}selected{% endif %}>Administrador</option></select>
+            <label for="usuario-activo">Acceso</label>
+            <select id="usuario-activo" name="activo"><option value="1" {% if not usuario_edicion or usuario_edicion.activo %}selected{% endif %}>Activo</option><option value="0" {% if usuario_edicion and not usuario_edicion.activo %}selected{% endif %}>Archivado</option></select>
+            <label for="usuario-contrasena">{% if usuario_edicion %}Nueva contraseña (opcional){% else %}Contraseña inicial{% endif %}</label>
+            <input id="usuario-contrasena" type="password" name="contrasena" minlength="8" maxlength="128" autocomplete="new-password" {% if not usuario_edicion %}required{% endif %}>
+            <p class="admin-form-help">{% if usuario_edicion %}Déjala vacía para conservar la contraseña actual.{% else %}Debe tener entre 8 y 128 caracteres. La contraseña se guarda con hash.{% endif %}</p>
+            <button name="accion" value="{{ 'guardar' if usuario_edicion else 'crear' }}">{{ "Guardar cambios" if usuario_edicion else "Crear usuario" }}</button>
+            {% if usuario_edicion %}<a href="{{ url_for('admin_usuarios') }}">Cancelar edición</a>{% endif %}
+        </form>
+    </section>
+    <section class="admin-students admin-detail-section">
+        <div class="admin-section-heading"><h2>Cuentas existentes</h2><span>{{ usuarios|length }} cuentas</span></div>
+        <div class="admin-management-list">
+            {% for usuario in usuarios %}
+            <article class="admin-management-row admin-user-row">
+                <div class="admin-user-info">
+                    <h3>{{ usuario.usuario }}</h3>
+                    <p>{{ "Administrador" if usuario.rol == "admin" else "Estudiante" }} · {{ "Activo" if usuario.activo else "Archivado" }}</p>
+                    <span class="admin-muted">
+                        {% if usuario.ultimo_inicio_sesion %}
+                            Último acceso: {{ usuario.ultimo_inicio_sesion.strftime("%d/%m/%Y %H:%M") }}
+                        {% else %}
+                            Aún no ha iniciado sesión
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="admin-row-actions admin-user-actions">
+                    <a class="admin-detail-link" href="{{ url_for('admin_usuarios', editar=usuario.id) }}">Editar</a>
+                    {% if usuario.rol == 'estudiante' and usuario.activo %}
+                        <a class="admin-detail-link" href="{{ url_for('admin_estudiante', usuario_id=usuario.id) }}">Ver avance</a>
+                    {% endif %}
+                    <form method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+                        <button class="admin-small-button" name="accion" value="{{ 'archivar' if usuario.activo else 'restaurar' }}">
+                            {{ "Archivar" if usuario.activo else "Restaurar" }}
+                        </button>
+                    </form>
+                </div>
+            </article>
+            {% else %}<p class="admin-empty-state">Aún no hay cuentas.</p>{% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

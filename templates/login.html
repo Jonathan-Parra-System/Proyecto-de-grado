@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | Plataforma Educativa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+    <header class="login-header">
+        <a class="login-brand" href="{{ url_for('inicio') }}">
+            <span class="login-brand-icon" aria-hidden="true">▰</span>
+            <span>Plataforma Educativa</span>
+        </a>
+        <span class="login-header-caption">Aprende a tu ritmo</span>
+    </header>
+
+    <main class="login-layout">
+        <section class="login-content" aria-labelledby="login-title">
+            <div class="login-form-container">
+                <p class="login-eyebrow">TU ESPACIO DE APRENDIZAJE</p>
+                <h1 id="login-title">¡Qué bueno verte!</h1>
+                <p class="login-intro">Ingresa tus datos para continuar aprendiendo.</p>
+
+                {% if request.args.get('registrado') %}
+                    <p class="login-message login-message-success" role="status">
+                        Cuenta creada. Ya puedes iniciar sesión.
+                    </p>
+                {% endif %}
+                {% if error %}
+                    <p class="login-message login-message-error" role="alert">{{ error }}</p>
+                {% endif %}
+
+                <form class="login-form" method="POST">
+                    <label for="usuario">Usuario</label>
+                    <input
+                        type="text"
+                        id="usuario"
+                        name="usuario"
+                        maxlength="50"
+                        autocomplete="username"
+                        value="{{ usuario or '' }}"
+                        required
+                    >
+
+                    <label for="contrasena">Contraseña</label>
+                    <input
+                        type="password"
+                        id="contrasena"
+                        name="contrasena"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button type="submit">Iniciar sesión <span aria-hidden="true">→</span></button>
+                </form>
+
+                <p class="login-register">
+                    ¿Aún no tienes cuenta?
+                    <a href="{{ url_for('registro') }}">Crear cuenta</a>
+                </p>
+                <a class="login-back-link" href="{{ url_for('inicio') }}">Volver al inicio</a>
+            </div>
+        </section>
+
+        <aside class="login-aside" aria-label="Información de la plataforma">
+            <div class="login-aside-content">
+                <div class="login-illustration" aria-hidden="true">
+                    <span>✦</span>
+                    <strong>学</strong>
+                    <span>✦</span>
+                </div>
+                <p class="login-aside-eyebrow">CADA PASO CUENTA</p>
+                <h2>Aprender abre nuevas oportunidades</h2>
+                <p>Continúa tus cursos, avanza en tus lecciones y descubre todo lo que puedes lograr.</p>
+                <div class="login-aside-accent" aria-hidden="true"></div>
+            </div>
+        </aside>
+    </main>
+</body>
+</html>

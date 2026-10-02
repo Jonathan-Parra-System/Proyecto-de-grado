@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ curso.titulo }} | Plataforma Educativa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="learning-page">
+    <header class="course-header">
+        <a class="course-back-link" href="{{ url_for('panel') }}">← Volver al panel</a>
+        <div class="course-header-copy">
+            <p class="course-kicker">RUTA DE APRENDIZAJE</p>
+            <h1>{{ curso.titulo }}</h1>
+            <p>{{ curso.descripcion }}</p>
+        </div>
+    </header>
+
+    <main class="course-main">
+        <section class="course-intro">
+            <div>
+                <p class="learning-eyebrow">TU CURSO</p>
+                <h2>Explora los módulos</h2>
+                <p>Lee cada lección y completa su actividad para registrar tu avance.</p>
+            </div>
+            <a class="course-progress-link" href="{{ url_for('progreso') }}">Ver mi progreso <span aria-hidden="true">→</span></a>
+        </section>
+
+        {% for modulo in modulos %}
+            <section class="course-module" aria-labelledby="module-{{ loop.index }}">
+                <div class="course-module-visual">
+                    <img src="{{ url_for('static', filename='images/' ~ modulo.imagen) }}" alt="" loading="lazy">
+                    <span>MÓDULO {{ "%02d"|format(loop.index) }}</span>
+                </div>
+                <div class="course-module-content">
+                    <h2 id="module-{{ loop.index }}">{{ modulo.titulo }}</h2>
+                    <p class="course-module-description">{{ modulo.descripcion }}</p>
+                    <ol class="course-lesson-list">
+                        {% for leccion in modulo.lecciones %}
+                            <li>
+                                <a class="course-lesson-link" href="{{ url_for('leccion', slug=leccion.slug) }}">
+                                    <span class="course-lesson-index">{{ "%02d"|format(loop.index) }}</span>
+                                    <span class="course-lesson-name">{{ leccion.titulo }}</span>
+                                    <span class="course-lesson-status">
+                                        {% if leccion.slug in lecciones_completadas %}
+                                            Completada
+                                        {% else %}
+                                            {{ leccion.duracion }}
+                                        {% endif %}
+                                    </span>
+                                    <span class="course-lesson-arrow" aria-hidden="true">→</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </section>
+        {% endfor %}
+    </main>
+</body>
+</html>

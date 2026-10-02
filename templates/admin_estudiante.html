@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Avance de {{ estudiante.usuario }} | Administración{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard admin-student-detail">
+    <a class="admin-back-link" href="{{ url_for('admin') }}">← Volver al panel administrativo</a>
+    <section class="admin-heading" aria-labelledby="student-title">
+        <div>
+            <p class="learning-eyebrow">FICHA DE APRENDIZAJE</p>
+            <h1 id="student-title">{{ estudiante.usuario }}</h1>
+            <p>
+                Último inicio de sesión:
+                {% if estudiante.ultimo_inicio_sesion %}
+                    <time datetime="{{ estudiante.ultimo_inicio_sesion.isoformat(sep=' ') }}">{{ estudiante.ultimo_inicio_sesion.strftime("%d/%m/%Y %H:%M") }}</time>
+                {% else %}
+                    Aún no ha ingresado
+                {% endif %}
+            </p>
+        </div>
+    </section>
+
+    <section class="admin-detail-summary" aria-label="Resumen individual">
+        <p><strong>{{ lecciones_completadas }} / {{ total_lecciones }}</strong><span>lecciones completadas</span></p>
+        <p><strong>{{ total_intentos }}</strong><span>intentos en actividades</span></p>
+        <p><strong>{{ resultados|length }}</strong><span>evaluaciones presentadas</span></p>
+    </section>
+
+    <section class="admin-students admin-detail-section" aria-labelledby="activities-title">
+        <div class="admin-section-heading">
+            <div>
+                <p class="learning-eyebrow">ACTIVIDADES POR CURSO</p>
+                <h2 id="activities-title">Avance de las lecciones</h2>
+            </div>
+        </div>
+        {% for curso in cursos %}
+            <div class="admin-course-progress">
+                <h3>{{ curso.titulo }}</h3>
+                <div class="admin-table-wrap" tabindex="0" aria-label="Tabla de actividades del curso. Desplázate horizontalmente para ver todas las columnas.">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Lección</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Intentos</th>
+                                <th scope="col">Última actividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leccion in curso.lecciones %}
+                                <tr>
+                                    <th scope="row">{{ leccion.titulo }}</th>
+                                    <td>
+                                        {% if leccion.completada %}
+                                            <span class="admin-status admin-status-complete">Completada</span>
+                                        {% elif leccion.intentos %}
+                                            <span class="admin-status admin-status-progress">En práctica</span>
+                                        {% else %}
+                                            <span class="admin-muted">Sin iniciar</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ leccion.intentos }}</td>
+                                    <td>
+                                        {% if leccion.ultima_actividad %}
+                                            <time datetime="{{ leccion.ultima_actividad.isoformat(sep=' ') }}">{{ leccion.ultima_actividad.strftime("%d/%m/%Y %H:%M") }}</time>
+                                        {% else %}
+                                            <span class="admin-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    </section>
+
+    <section class="admin-students admin-detail-section" aria-labelledby="evaluations-title">
+        <div class="admin-section-heading">
+            <div>
+                <p class="learning-eyebrow">RESULTADOS REALES</p>
+                <h2 id="evaluations-title">Historial de evaluaciones</h2>
+            </div>
+        </div>
+        {% if resultados %}
+            <div class="admin-table-wrap" tabindex="0" aria-label="Historial de evaluaciones. Desplázate horizontalmente para ver todas las columnas.">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Evaluación</th>
+                            <th scope="col">Resultado</th>
+                            <th scope="col">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resultado in resultados %}
+                            <tr>
+                                <th scope="row">{{ resultado.evaluacion_titulo }} · v{{ resultado.version }}</th>
+                                <td>{{ resultado.puntos }} / {{ resultado.total_preguntas }}</td>
+                                <td><time datetime="{{ resultado.creado_en.isoformat(sep=' ') }}">{{ resultado.creado_en.strftime("%d/%m/%Y %H:%M") }}</time></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="admin-empty-state">Esta persona aún no ha presentado evaluaciones.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

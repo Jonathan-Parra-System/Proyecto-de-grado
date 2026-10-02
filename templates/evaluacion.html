@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ evaluacion.titulo }} | Plataforma Educativa{% endblock %}
+{% block content %}
+<section class="assessment-page" aria-labelledby="assessment-title">
+    <p class="learning-eyebrow">EVALUACIÓN</p>
+    <h1 id="assessment-title">{{ evaluacion.titulo }}</h1>
+    <p>{{ evaluacion.descripcion }}</p>
+    <form class="assessment-form" method="post" action="{{ url_for('evaluacion_detalle', slug=evaluacion.slug) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% for pregunta in evaluacion.preguntas %}
+            <section class="pregunta">
+                <h2>{{ loop.index }}. {{ pregunta.pregunta }}</h2>
+                {% for opcion in pregunta.opciones %}
+                    <label>
+                        <input type="radio" name="pregunta_{{ pregunta.id }}" value="{{ opcion.valor }}" required>
+                        {{ opcion.etiqueta }}
+                    </label>
+                {% endfor %}
+            </section>
+        {% endfor %}
+        <button type="submit">Enviar evaluación</button>
+    </form>
+</section>
+{% endblock %}

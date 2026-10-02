@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Lecciones | Administración{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <a class="admin-back-link" href="{{ url_for('admin_gestion') }}">← Gestión de plataforma</a>
+    <section class="admin-heading"><div><p class="learning-eyebrow">CONTENIDO</p><h1>Gestionar lecciones y actividades</h1><p>Los slugs se generan al crear y no cambian al editar, para preservar el historial de avance.</p></div></section>
+    <section class="admin-students admin-form-card">
+        <h2>{{ "Editar lección" if leccion_edicion else "Agregar lección" }}</h2>
+        <form method="post" class="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% if leccion_edicion %}<input type="hidden" name="leccion_id" value="{{ leccion_edicion.id }}"><p class="admin-muted">Identificador estable: {{ leccion_edicion.slug }}</p>{% endif %}
+            <label for="leccion-modulo">Módulo</label>
+            <select id="leccion-modulo" name="modulo_id" required>
+                {% for modulo in modulos %}<option value="{{ modulo.id }}" {% if leccion_edicion and leccion_edicion.modulo_id == modulo.id %}selected{% endif %} {% if not modulo.activo or not modulo.curso_activo %}disabled{% endif %}>{{ modulo.curso_titulo }} — {{ modulo.titulo }}{% if not modulo.activo or not modulo.curso_activo %} (archivado){% endif %}</option>{% endfor %}
+            </select>
+            <label for="leccion-titulo">Título</label><input id="leccion-titulo" name="titulo" maxlength="180" required value="{{ leccion_edicion.titulo if leccion_edicion else '' }}">
+            <label for="leccion-duracion">Duración estimada</label><input id="leccion-duracion" name="duracion" maxlength="30" required placeholder="5 min" value="{{ leccion_edicion.duracion if leccion_edicion else '' }}">
+            <label for="leccion-introduccion">Introducción</label><textarea id="leccion-introduccion" name="introduccion" rows="3" required>{{ leccion_edicion.introduccion if leccion_edicion else '' }}</textarea>
+            <label for="leccion-objetivos">Objetivos (uno por línea)</label><textarea id="leccion-objetivos" name="objetivos" rows="4" required>{% if leccion_edicion %}{{ leccion_edicion.objetivos|join('\n') }}{% endif %}</textarea>
+            <label for="leccion-pasos">Pasos (uno por línea: título|explicación)</label><textarea id="leccion-pasos" name="pasos" rows="5" required>{% if leccion_edicion %}{% for paso in leccion_edicion.pasos %}{{ paso.titulo }}|{{ paso.texto }}{% if not loop.last %}
+{% endif %}{% endfor %}{% endif %}</textarea>
+            <label for="actividad-pregunta">Pregunta de actividad</label><textarea id="actividad-pregunta" name="actividad_pregunta" rows="2" required>{{ leccion_edicion.actividad_pregunta if leccion_edicion else '' }}</textarea>
+            <label for="actividad-opciones">Opciones (una por línea: valor|texto)</label><textarea id="actividad-opciones" name="opciones" rows="4" required>{% if leccion_edicion %}{% for opcion in leccion_edicion.actividad_opciones %}{{ opcion.valor }}|{{ opcion.etiqueta }}{% if not loop.last %}
+{% endif %}{% endfor %}{% endif %}</textarea>
+            <label for="actividad-respuesta">Valor de la respuesta correcta</label><input id="actividad-respuesta" name="actividad_respuesta" required value="{{ leccion_edicion.actividad_respuesta if leccion_edicion else '' }}">
+            <button name="accion" value="{{ 'guardar' if leccion_edicion else 'crear' }}">{{ "Guardar cambios" if leccion_edicion else "Crear lección" }}</button>
+            {% if leccion_edicion %}<a href="{{ url_for('admin_lecciones') }}">Cancelar edición</a>{% endif %}
+        </form>
+    </section>
+    <section class="admin-students admin-detail-section">
+        <div class="admin-section-heading"><h2>Lecciones existentes</h2><span>{{ lecciones|length }} lecciones</span></div>
+        <div class="admin-management-list">
+            {% for leccion in lecciones %}
+            <article class="admin-management-row">
+                <div><p class="learning-eyebrow">{{ leccion.curso_titulo }} · {{ leccion.modulo_titulo }}</p><h3>{{ leccion.titulo }}</h3><span class="admin-muted">/{{ leccion.slug }} · {{ leccion.duracion }} · {{ "Activa" if leccion.activo else "Archivada" }}</span></div>
+                <div class="admin-row-actions"><a class="admin-detail-link" href="{{ url_for('admin_lecciones', editar=leccion.id) }}">Editar</a><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="leccion_id" value="{{ leccion.id }}"><button class="admin-small-button" name="accion" value="{{ 'archivar' if leccion.activo else 'restaurar' }}">{{ "Archivar" if leccion.activo else "Restaurar" }}</button></form></div>
+            </article>
+            {% else %}<p class="admin-empty-state">Aún no hay lecciones.</p>{% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

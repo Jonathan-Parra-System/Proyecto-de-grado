@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Gestionar plataforma | Administración{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <a class="admin-back-link" href="{{ url_for('admin') }}">← Volver al resumen</a>
+    <section class="admin-heading">
+        <div>
+            <p class="learning-eyebrow">HERRAMIENTAS DE ADMINISTRACIÓN</p>
+            <h1>Gestionar plataforma</h1>
+            <p>Administra el contenido y las cuentas. Las bajas se archivan para conservar el historial.</p>
+        </div>
+    </section>
+    <section class="admin-management-grid" aria-label="Secciones de gestión">
+        <a class="admin-management-card" href="{{ url_for('admin_cursos') }}">
+            <span aria-hidden="true">01</span><h2>Cursos</h2>
+            <p>Crear, editar y archivar cursos.</p><strong>Gestionar cursos →</strong>
+        </a>
+        <a class="admin-management-card" href="{{ url_for('admin_modulos') }}">
+            <span aria-hidden="true">02</span><h2>Módulos</h2>
+            <p>Organizar módulos, cursos e ilustraciones.</p><strong>Gestionar módulos →</strong>
+        </a>
+        <a class="admin-management-card" href="{{ url_for('admin_lecciones') }}">
+            <span aria-hidden="true">03</span><h2>Lecciones y actividades</h2>
+            <p>Editar textos, objetivos, pasos y respuestas de actividades.</p><strong>Gestionar lecciones →</strong>
+        </a>
+        <a class="admin-management-card" href="{{ url_for('admin_evaluaciones') }}">
+            <span aria-hidden="true">04</span><h2>Evaluaciones</h2>
+            <p>Crear evaluaciones y administrar preguntas y opciones.</p><strong>Gestionar evaluaciones →</strong>
+        </a>
+        <a class="admin-management-card" href="{{ url_for('admin_usuarios') }}">
+            <span aria-hidden="true">05</span><h2>Usuarios y roles</h2>
+            <p>Crear cuentas, editar roles, restablecer contraseñas y archivar cuentas.</p><strong>Gestionar usuarios →</strong>
+        </a>
+    </section>
+</div>
+{% endblock %}

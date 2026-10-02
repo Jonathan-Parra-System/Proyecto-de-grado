@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluaciones | Administración{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <a class="admin-back-link" href="{{ url_for('admin_gestion') }}">← Gestión de plataforma</a>
+    <section class="admin-heading"><div><p class="learning-eyebrow">EVALUACIÓN DEL APRENDIZAJE</p><h1>Gestionar evaluaciones</h1><p>Las preguntas anteriores se archivan al editar; los resultados históricos se conservan.</p></div></section>
+    <section class="admin-students admin-form-card">
+        <h2>{{ "Editar evaluación" if evaluacion_edicion else "Agregar evaluación" }}</h2>
+        <form method="post" class="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% if evaluacion_edicion %}<input type="hidden" name="evaluacion_id" value="{{ evaluacion_edicion.id }}"><p class="admin-muted">Identificador estable: {{ evaluacion_edicion.slug }}</p>{% endif %}
+            <label for="evaluacion-titulo">Título</label><input id="evaluacion-titulo" name="titulo" maxlength="180" required value="{{ evaluacion_edicion.titulo if evaluacion_edicion else '' }}">
+            <label for="evaluacion-descripcion">Descripción</label><textarea id="evaluacion-descripcion" name="descripcion" rows="3" required>{{ evaluacion_edicion.descripcion if evaluacion_edicion else '' }}</textarea>
+            <label for="evaluacion-curso">Curso asociado</label>
+            <select id="evaluacion-curso" name="curso_id"><option value="">Evaluación general</option>{% for curso in cursos %}<option value="{{ curso.id }}" {% if evaluacion_edicion and evaluacion_edicion.curso_id == curso.id %}selected{% endif %}>{{ curso.titulo }}</option>{% endfor %}</select>
+            <label for="evaluacion-preguntas">Preguntas (una por línea: pregunta|valor:opción|valor:opción|valor:opción correcta*)</label>
+            <textarea id="evaluacion-preguntas" name="preguntas" rows="9" required placeholder="¿Qué sirve para escribir?|pantalla:Monitor|teclado:Teclado*|audio:Parlantes">{% if evaluacion_edicion %}{% for pregunta in evaluacion_edicion.preguntas %}{{ pregunta.pregunta }}{% for opcion in pregunta.opciones %}|{{ opcion.valor }}:{{ opcion.etiqueta }}{% if opcion.valor == pregunta.respuesta_correcta %}*{% endif %}{% endfor %}{% if not loop.last %}
+{% endif %}{% endfor %}{% endif %}</textarea>
+            <p class="admin-form-help">Marca una sola opción correcta por pregunta con un asterisco final. Se requieren al menos tres opciones. No uses el carácter | dentro de los textos.</p>
+            <button name="accion" value="{{ 'guardar' if evaluacion_edicion else 'crear' }}">{{ "Guardar cambios" if evaluacion_edicion else "Crear evaluación" }}</button>
+            {% if evaluacion_edicion %}<a href="{{ url_for('admin_evaluaciones') }}">Cancelar edición</a>{% endif %}
+        </form>
+    </section>
+    <section class="admin-students admin-detail-section">
+        <div class="admin-section-heading"><h2>Evaluaciones existentes</h2><span>{{ evaluaciones|length }} evaluaciones</span></div>
+        <div class="admin-management-list">
+            {% for evaluacion in evaluaciones %}
+            <article class="admin-management-row">
+                <div><p class="learning-eyebrow">{{ evaluacion.curso_titulo or "Evaluación general" }}</p><h3>{{ evaluacion.titulo }}</h3><p>{{ evaluacion.descripcion }}</p><span class="admin-muted">/{{ evaluacion.slug }} · {{ evaluacion.preguntas|length }} preguntas · {{ "Activa" if evaluacion.activo else "Archivada" }}</span></div>
+                <div class="admin-row-actions"><a class="admin-detail-link" href="{{ url_for('admin_evaluaciones', editar=evaluacion.id) }}">Editar</a><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="evaluacion_id" value="{{ evaluacion.id }}"><button class="admin-small-button" name="accion" value="{{ 'archivar' if evaluacion.activo else 'restaurar' }}">{{ "Archivar" if evaluacion.activo else "Restaurar" }}</button></form></div>
+            </article>
+            {% else %}<p class="admin-empty-state">Aún no hay evaluaciones.</p>{% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

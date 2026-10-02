@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluaciones | Plataforma Educativa{% endblock %}
+{% block content %}
+<section class="assessment-page" aria-labelledby="assessments-title">
+    <p class="learning-eyebrow">PON A PRUEBA LO APRENDIDO</p>
+    <h1 id="assessments-title">Evaluaciones</h1>
+    <p>Elige una evaluación para comprobar lo que has aprendido.</p>
+    {% if evaluaciones %}
+        <div class="admin-management-list">
+            {% for evaluacion in evaluaciones %}
+                <article class="admin-management-row">
+                    <div>
+                        <p class="learning-eyebrow">{{ evaluacion.curso_titulo or "Evaluación general" }}</p>
+                        <h2>{{ evaluacion.titulo }}</h2>
+                        <p>{{ evaluacion.descripcion }}</p>
+                        <span class="admin-muted">{{ evaluacion.preguntas|length }} preguntas</span>
+                    </div>
+                    <a class="result-return" href="{{ url_for('evaluacion_detalle', slug=evaluacion.slug) }}">Comenzar <span aria-hidden="true">→</span></a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="admin-empty-state">Todavía no hay evaluaciones disponibles.</p>
+    {% endif %}
+</section>
+{% endblock %}

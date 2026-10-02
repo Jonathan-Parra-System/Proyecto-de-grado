@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio | Plataforma Educativa{% endblock %}
+{% block page_class %}home-page{% endblock %}
+{% block header_class %}home-site-header{% endblock %}
+{% block nav_class %}home-nav{% endblock %}
+{% block main_class %}home-main{% endblock %}
+
+{% block navigation %}
+    <a href="{{ url_for('inicio') }}" aria-current="page">Inicio</a>
+    <a href="{{ url_for('login') }}">Iniciar sesión</a>
+    <a class="home-nav-cta" href="{{ url_for('registro') }}">Crear cuenta</a>
+{% endblock %}
+
+{% block content %}
+<section class="home-hero" aria-labelledby="home-title">
+    <div class="home-hero-copy">
+        <p class="home-eyebrow">APRENDIZAJE DIGITAL · BUCARAMANGA · 2026</p>
+        <h2 id="home-title">La tecnología también es para ti.</h2>
+        <p class="home-hero-description">
+            Aprende a usar el computador, Internet y herramientas digitales con explicaciones
+            sencillas, actividades prácticas y a tu propio ritmo.
+        </p>
+        <div class="home-hero-actions">
+            <a class="home-button-primary" href="{{ url_for('registro') }}">Comenzar a aprender <span aria-hidden="true">→</span></a>
+            <a class="home-button-secondary" href="#sobre-la-plataforma">Conoce la plataforma</a>
+        </div>
+        <p class="home-audience-note">Una propuesta educativa pensada para fortalecer la alfabetización digital de personas mayores de 40 años.</p>
+    </div>
+    <div class="home-hero-art">
+        <img src="{{ url_for('static', filename='images/internet.svg') }}" alt="Ilustración de una ventana de navegador y conexiones de Internet">
+        <div class="home-art-caption">
+            <span class="home-art-dot" aria-hidden="true"></span>
+            Aprende paso a paso, sin prisa
+        </div>
+    </div>
+</section>
+
+<section class="home-about" id="sobre-la-plataforma" aria-labelledby="about-title">
+    <div class="home-section-heading">
+        <p class="home-eyebrow">¿QUÉ ES ESTA PLATAFORMA?</p>
+        <h2 id="about-title">Un espacio para aprender haciendo</h2>
+        <p>
+            Es un prototipo educativo interactivo que reúne cursos breves de informática básica,
+            Internet y herramientas digitales. Cada lección combina explicaciones claras con
+            una actividad para practicar lo aprendido.
+        </p>
+    </div>
+    <div class="home-feature-grid">
+        <article class="home-feature-card">
+            <span class="home-feature-icon" aria-hidden="true">01</span>
+            <h3>Avanza a tu ritmo</h3>
+            <p>Recorre las lecciones en pasos cortos y vuelve a intentarlo cuando lo necesites.</p>
+        </article>
+        <article class="home-feature-card">
+            <span class="home-feature-icon" aria-hidden="true">02</span>
+            <h3>Practica con actividades</h3>
+            <p>Comprueba tus respuestas y consulta el avance de las lecciones completadas.</p>
+        </article>
+        <article class="home-feature-card">
+            <span class="home-feature-icon" aria-hidden="true">03</span>
+            <h3>Aprende habilidades útiles</h3>
+            <p>Explora el uso del computador, la navegación segura, documentos, correo y colaboración.</p>
+        </article>
+    </div>
+</section>
+
+<section class="home-purpose-grid" aria-label="Propósito, misión y visión">
+    <article class="home-purpose-card home-purpose-mission">
+        <p class="home-eyebrow">NUESTRA MISIÓN</p>
+        <h2>Acercar el aprendizaje digital</h2>
+        <p>
+            Ofrecer una experiencia educativa clara, práctica y accesible que acompañe a las
+            personas mayores de 40 años de Bucaramanga en el desarrollo de habilidades digitales
+            para su vida cotidiana.
+        </p>
+    </article>
+    <article class="home-purpose-card home-purpose-vision">
+        <p class="home-eyebrow">NUESTRA VISIÓN</p>
+        <h2>Más autonomía en un mundo digital</h2>
+        <p>
+            Ser una plataforma de referencia local para aprender tecnología con confianza,
+            promoviendo la participación, la autonomía y nuevas oportunidades de aprendizaje
+            a lo largo de la vida.
+        </p>
+    </article>
+</section>
+
+<section class="home-goals" aria-labelledby="goals-title">
+    <div class="home-goals-heading">
+        <p class="home-eyebrow">HACIA DÓNDE VAMOS</p>
+        <h2 id="goals-title">Metas del proyecto</h2>
+        <p>Estos son los objetivos que orientan el desarrollo y la futura validación de la plataforma.</p>
+    </div>
+    <ol class="home-goal-list">
+        <li>
+            <span>01</span>
+            <div><h3>Conocer a las personas usuarias</h3><p>Identificar necesidades de aprendizaje y barreras tecnológicas mediante diseño centrado en las personas y principios de andragogía.</p></div>
+        </li>
+        <li>
+            <span>02</span>
+            <div><h3>Diseñar para una navegación sencilla</h3><p>Construir una arquitectura e interfaz intuitivas y responsivas que faciliten el uso autónomo de herramientas digitales.</p></div>
+        </li>
+        <li>
+            <span>03</span>
+            <div><h3>Crear experiencias prácticas</h3><p>Desarrollar módulos educativos con actividades aplicables a situaciones cotidianas.</p></div>
+        </li>
+        <li>
+            <span>04</span>
+            <div><h3>Validar con usuarios reales</h3><p>Evaluar usabilidad y resultados de aprendizaje con participantes y métricas, como siguiente etapa del proyecto.</p></div>
+        </li>
+    </ol>
+</section>
+
+<section class="home-final-cta" aria-labelledby="final-cta-title">
+    <div>
+        <p class="home-eyebrow">TU SIGUIENTE PASO</p>
+        <h2 id="final-cta-title">Cada habilidad nueva cuenta.</h2>
+        <p>Explora los cursos y comienza con una lección sencilla.</p>
+    </div>
+    <a class="home-button-primary" href="{{ url_for('registro') }}">Crear mi cuenta <span aria-hidden="true">→</span></a>
+</section>
+{% endblock %}

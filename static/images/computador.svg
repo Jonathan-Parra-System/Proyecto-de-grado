@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-labelledby="title desc">
+  <title id="title">Computador de escritorio</title>
+  <desc id="desc">Ilustración de un computador con monitor, teclado y mouse.</desc>
+  <rect width="480" height="320" rx="28" fill="#e4eee6"/>
+  <circle cx="390" cy="67" r="34" fill="#f2e9d9"/>
+  <path d="M62 250h356" stroke="#28594f" stroke-width="9" stroke-linecap="round"/>
+  <rect x="111" y="55" width="235" height="153" rx="15" fill="#61283f"/>
+  <rect x="123" y="67" width="211" height="128" rx="8" fill="#fbf8f1"/>
+  <rect x="143" y="86" width="79" height="12" rx="6" fill="#a83f78"/>
+  <rect x="143" y="109" width="154" height="9" rx="4" fill="#397568"/>
+  <rect x="143" y="127" width="128" height="9" rx="4" fill="#d6cbb9"/>
+  <rect x="143" y="145" width="143" height="9" rx="4" fill="#d6cbb9"/>
+  <path d="M201 208v22m54-22v22m-72 0h90" stroke="#61283f" stroke-width="12" stroke-linecap="round"/>
+  <path d="M82 235h210l-18 24H101z" fill="#a83f78"/>
+  <path d="M310 225c0-16 12-29 27-29s27 13 27 29v20h-54z" fill="#397568" stroke="#28594f" stroke-width="6"/>
+  <path d="M337 198v16" stroke="#f2e9d9" stroke-width="4" stroke-linecap="round"/>
+  <path d="M62 74h22m-11-11v22" stroke="#a83f78" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="399" cy="224" r="8" fill="#a83f78"/>
+</svg>

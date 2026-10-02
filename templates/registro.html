@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear cuenta | Plataforma Educativa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+    <header class="login-header">
+        <a class="login-brand" href="{{ url_for('inicio') }}">
+            <span class="login-brand-icon" aria-hidden="true">▰</span>
+            <span>Plataforma Educativa</span>
+        </a>
+        <span class="login-header-caption">Aprende a tu ritmo</span>
+    </header>
+
+    <main class="login-layout">
+        <section class="login-content" aria-labelledby="register-title">
+            <div class="login-form-container">
+                <p class="login-eyebrow">COMIENZA TU CAMINO</p>
+                <h1 id="register-title">Crea tu cuenta</h1>
+                <p class="login-intro">Únete y empieza a aprender a tu propio ritmo.</p>
+
+                {% if error %}
+                    <p class="login-message login-message-error" role="alert">{{ error }}</p>
+                {% endif %}
+
+                <form class="login-form" method="POST">
+                    <label for="usuario">Usuario</label>
+                    <input
+                        type="text"
+                        id="usuario"
+                        name="usuario"
+                        maxlength="50"
+                        autocomplete="username"
+                        value="{{ usuario or '' }}"
+                        required
+                    >
+
+                    <label for="contrasena">Contraseña</label>
+                    <input
+                        type="password"
+                        id="contrasena"
+                        name="contrasena"
+                        minlength="8"
+                        maxlength="128"
+                        autocomplete="new-password"
+                        aria-describedby="password-help"
+                        required
+                    >
+                    <p class="register-password-help" id="password-help">
+                        Usa entre 8 y 128 caracteres.
+                    </p>
+
+                    <button type="submit">Crear cuenta <span aria-hidden="true">→</span></button>
+                </form>
+
+                <p class="login-register">
+                    ¿Ya tienes cuenta?
+                    <a href="{{ url_for('login') }}">Iniciar sesión</a>
+                </p>
+                <a class="login-back-link" href="{{ url_for('inicio') }}">Volver al inicio</a>
+            </div>
+        </section>
+
+        <aside class="login-aside" aria-label="Información sobre el aprendizaje">
+            <div class="login-aside-content">
+                <div class="login-illustration" aria-hidden="true">
+                    <span>✦</span>
+                    <strong>学</strong>
+                    <span>✦</span>
+                </div>
+                <p class="login-aside-eyebrow">TU PRÓXIMO PASO</p>
+                <h2>Un mundo nuevo de conocimientos te espera</h2>
+                <p>Crea tu cuenta para guardar tu avance y continuar tus lecciones cuando quieras.</p>
+                <div class="login-aside-accent" aria-hidden="true"></div>
+            </div>
+        </aside>
+    </main>
+</body>
+</html>

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Administración | Plataforma Educativa{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <section class="admin-heading" aria-labelledby="admin-title">
+        <div>
+            <p class="learning-eyebrow">SEGUIMIENTO DEL APRENDIZAJE</p>
+            <h1 id="admin-title">Panel de administración</h1>
+            <p>Consulta resultados y gestiona cuentas y contenido educativo.</p>
+        </div>
+        <a class="admin-detail-link" href="{{ url_for('admin_gestion') }}">Gestionar plataforma →</a>
+    </section>
+
+    <section class="admin-metrics" aria-label="Resumen de la plataforma">
+        <article class="admin-metric-card">
+            <span class="admin-metric-label">Personas estudiantes</span>
+            <strong>{{ total_estudiantes }}</strong>
+            <span>cuentas registradas</span>
+        </article>
+        <article class="admin-metric-card">
+            <span class="admin-metric-label">Con inicio de sesión</span>
+            <strong>{{ estudiantes_activos }}</strong>
+            <span>han ingresado al menos una vez</span>
+        </article>
+        <article class="admin-metric-card">
+            <span class="admin-metric-label">Lecciones completadas</span>
+            <strong>{{ lecciones_completadas }}</strong>
+            <span>de {{ total_lecciones }} posibles por estudiante</span>
+        </article>
+        <article class="admin-metric-card">
+            <span class="admin-metric-label">Promedio de última evaluación</span>
+            <strong>{% if promedio_evaluacion is not none %}{{ promedio_evaluacion }}%{% else %}—{% endif %}</strong>
+            <span>entre quienes ya la presentaron</span>
+        </article>
+    </section>
+
+    <section class="admin-students" aria-labelledby="students-title">
+        <div class="admin-section-heading">
+            <div>
+                <p class="learning-eyebrow">CUENTAS Y AVANCE</p>
+                <h2 id="students-title">Personas estudiantes</h2>
+            </div>
+            <a class="admin-detail-link" href="{{ url_for('admin_usuarios') }}">Administrar usuarios →</a>
+        </div>
+        {% if estudiantes %}
+            <div class="admin-table-wrap" tabindex="0" aria-label="Tabla de avance de estudiantes. Desplázate horizontalmente para ver todas las columnas.">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Último inicio de sesión</th>
+                            <th scope="col">Lecciones</th>
+                            <th scope="col">Última evaluación</th>
+                            <th scope="col">Revisar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for estudiante in estudiantes %}
+                            <tr>
+                                <th scope="row">{{ estudiante.usuario }}</th>
+                                <td>
+                                    {% if estudiante.ultimo_inicio_sesion %}
+                                        <time datetime="{{ estudiante.ultimo_inicio_sesion.isoformat(sep=' ') }}">{{ estudiante.ultimo_inicio_sesion.strftime("%d/%m/%Y %H:%M") }}</time>
+                                    {% else %}
+                                        <span class="admin-muted">Aún no ha ingresado</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ estudiante.lecciones_completadas }} / {{ total_lecciones }}</td>
+                                <td>
+                                    {% if estudiante.ultimo_puntaje is not none %}
+                                        {{ estudiante.ultimo_puntaje }} / {{ estudiante.total_preguntas }}
+                                    {% else %}
+                                        <span class="admin-muted">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td><a class="admin-detail-link" href="{{ url_for('admin_estudiante', usuario_id=estudiante.id) }}">Ver detalle <span aria-hidden="true">→</span></a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="admin-empty-state">Todavía no hay cuentas de estudiantes para mostrar.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

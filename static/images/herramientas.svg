@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-labelledby="title desc">
+  <title id="title">Herramientas digitales</title>
+  <desc id="desc">Ilustración de un documento, un mensaje y una videollamada.</desc>
+  <rect width="480" height="320" rx="28" fill="#f2e9d9"/>
+  <circle cx="86" cy="73" r="30" fill="#e4eee6"/>
+  <path d="M76 73h20m-10-10v20" stroke="#397568" stroke-width="5" stroke-linecap="round"/>
+  <rect x="75" y="126" width="132" height="132" rx="17" fill="#397568"/>
+  <path d="M102 157h78m-78 20h78m-78 20h60" stroke="#fbf8f1" stroke-width="9" stroke-linecap="round"/>
+  <path d="M240 103h134a20 20 0 0 1 20 20v69a20 20 0 0 1-20 20h-79l-34 29v-29h-21a20 20 0 0 1-20-20v-69a20 20 0 0 1 20-20z" fill="#a83f78"/>
+  <circle cx="278" cy="157" r="7" fill="#fbf8f1"/>
+  <circle cx="307" cy="157" r="7" fill="#fbf8f1"/>
+  <circle cx="336" cy="157" r="7" fill="#fbf8f1"/>
+  <rect x="251" y="224" width="167" height="56" rx="14" fill="#61283f"/>
+  <circle cx="280" cy="252" r="15" fill="#f2e9d9"/>
+  <path d="M272 252h16m-8-8v16" stroke="#397568" stroke-width="4" stroke-linecap="round"/>
+  <path d="m312 241 26 11-26 11z" fill="#fbf8f1"/>
+  <path d="M360 239h33m-33 13h24" stroke="#d9cbbb" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="409" cy="69" r="8" fill="#a83f78"/>
+</svg>

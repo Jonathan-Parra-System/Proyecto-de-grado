@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Módulos | Administración{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <a class="admin-back-link" href="{{ url_for('admin_gestion') }}">← Gestión de plataforma</a>
+    <section class="admin-heading"><div><p class="learning-eyebrow">CONTENIDO</p><h1>Gestionar módulos</h1><p>Asigna módulos a cursos y elige una ilustración disponible.</p></div></section>
+    <section class="admin-students admin-form-card">
+        <h2>{{ "Editar módulo" if modulo_edicion else "Agregar módulo" }}</h2>
+        <form method="post" class="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% if modulo_edicion %}<input type="hidden" name="modulo_id" value="{{ modulo_edicion.id }}">{% endif %}
+            <label for="modulo-curso">Curso</label>
+            <select id="modulo-curso" name="curso_id" required>
+                {% for curso in cursos %}<option value="{{ curso.id }}" {% if modulo_edicion and modulo_edicion.curso_id == curso.id %}selected{% endif %} {% if not curso.activo %}disabled{% endif %}>{{ curso.titulo }}{% if not curso.activo %} (archivado){% endif %}</option>{% endfor %}
+            </select>
+            <label for="modulo-titulo">Nombre del módulo</label>
+            <input id="modulo-titulo" name="titulo" maxlength="180" required value="{{ modulo_edicion.titulo if modulo_edicion else '' }}">
+            <label for="modulo-descripcion">Descripción</label>
+            <textarea id="modulo-descripcion" name="descripcion" rows="3" required>{{ modulo_edicion.descripcion if modulo_edicion else '' }}</textarea>
+            <label for="modulo-imagen">Ilustración</label>
+            <select id="modulo-imagen" name="imagen" required>
+                {% for imagen in imagenes %}<option value="{{ imagen }}" {% if modulo_edicion and modulo_edicion.imagen == imagen %}selected{% endif %}>{{ imagen }}</option>{% endfor %}
+            </select>
+            <label for="modulo-orden">Orden de aparición</label>
+            <input id="modulo-orden" name="orden" type="number" min="0" value="{{ modulo_edicion.orden if modulo_edicion else 0 }}">
+            <button name="accion" value="{{ 'guardar' if modulo_edicion else 'crear' }}">{{ "Guardar cambios" if modulo_edicion else "Crear módulo" }}</button>
+            {% if modulo_edicion %}<a href="{{ url_for('admin_modulos') }}">Cancelar edición</a>{% endif %}
+        </form>
+    </section>
+    <section class="admin-students admin-detail-section">
+        <div class="admin-section-heading"><h2>Módulos existentes</h2><span>{{ modulos|length }} módulos</span></div>
+        <div class="admin-management-list">
+            {% for modulo in modulos %}
+            <article class="admin-management-row">
+                <div><p class="learning-eyebrow">{{ modulo.curso_titulo }}</p><h3>{{ modulo.titulo }}</h3><p>{{ modulo.descripcion }}</p><span class="admin-muted">{{ modulo.total_lecciones }} lecciones · Orden {{ modulo.orden }} · {{ "Activo" if modulo.activo else "Archivado" }}</span></div>
+                <div class="admin-row-actions"><a class="admin-detail-link" href="{{ url_for('admin_modulos', editar=modulo.id) }}">Editar</a><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="modulo_id" value="{{ modulo.id }}"><button class="admin-small-button" name="accion" value="{{ 'archivar' if modulo.activo else 'restaurar' }}">{{ "Archivar" if modulo.activo else "Restaurar" }}</button></form></div>
+            </article>
+            {% else %}<p class="admin-empty-state">Aún no hay módulos.</p>{% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Cursos | Administración{% endblock %}
+{% block main_class %}admin-shell{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <a class="admin-back-link" href="{{ url_for('admin_gestion') }}">← Gestión de plataforma</a>
+    <section class="admin-heading"><div><p class="learning-eyebrow">CONTENIDO</p><h1>Gestionar cursos</h1><p>El slug del curso se crea automáticamente y permanece estable para conservar sus referencias.</p></div></section>
+    <section class="admin-students admin-form-card">
+        <h2>{{ "Editar curso" if curso_edicion else "Agregar curso" }}</h2>
+        <form method="post" class="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% if curso_edicion %}<input type="hidden" name="curso_id" value="{{ curso_edicion.id }}">{% endif %}
+            <label for="curso-titulo">Nombre del curso</label>
+            <input id="curso-titulo" name="titulo" maxlength="150" required value="{{ curso_edicion.titulo if curso_edicion else '' }}">
+            <label for="curso-descripcion">Descripción</label>
+            <textarea id="curso-descripcion" name="descripcion" rows="3" required>{{ curso_edicion.descripcion if curso_edicion else '' }}</textarea>
+            <button name="accion" value="{{ 'guardar' if curso_edicion else 'crear' }}">{{ "Guardar cambios" if curso_edicion else "Crear curso" }}</button>
+            {% if curso_edicion %}<a href="{{ url_for('admin_cursos') }}">Cancelar edición</a>{% endif %}
+        </form>
+    </section>
+    <section class="admin-students admin-detail-section">
+        <div class="admin-section-heading"><h2>Cursos existentes</h2><span>{{ cursos|length }} cursos</span></div>
+        <div class="admin-management-list">
+            {% for curso in cursos %}
+            <article class="admin-management-row">
+                <div><h3>{{ curso.titulo }}</h3><p>{{ curso.descripcion }}</p><span class="admin-muted">/{{ curso.slug }} · {{ curso.total_modulos }} módulos · {{ "Activo" if curso.activo else "Archivado" }}</span></div>
+                <div class="admin-row-actions">
+                    <a class="admin-detail-link" href="{{ url_for('admin_cursos', editar=curso.id) }}">Editar</a>
+                    <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="curso_id" value="{{ curso.id }}"><button class="admin-small-button" name="accion" value="{{ 'archivar' if curso.activo else 'restaurar' }}">{{ "Archivar" if curso.activo else "Restaurar" }}</button></form>
+                </div>
+            </article>
+            {% else %}<p class="admin-empty-state">Aún no hay cursos.</p>{% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

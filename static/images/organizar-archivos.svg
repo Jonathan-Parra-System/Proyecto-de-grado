@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Archivos organizados en carpetas</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <rect x="36" y="30" width="248" height="120" rx="10" fill="#fbf8f1" stroke="#d9cdbd" stroke-width="3"/>
+  <path d="M55 65h67l12 12h48v44H55z" fill="#397568"/>
+  <path d="M158 65h47l12 12h47v44h-94z" fill="#a83f78"/>
+  <path d="M70 88h76m-76 12h58m45-12h60m-60 12h43" stroke="#fbf8f1" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="74" cy="49" r="5" fill="#a83f78"/><circle cx="91" cy="49" r="5" fill="#397568"/>
+</svg>

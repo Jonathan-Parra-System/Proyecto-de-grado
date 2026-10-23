@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ leccion.titulo }} | Plataforma Educativa</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=7) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=8) }}">
 </head>
 <body class="learning-page">
     <header class="lesson-header">
@@ -47,7 +47,7 @@
                 <p class="learning-eyebrow">CONTENIDO DE LA LECCIÓN</p>
                 <h2 id="steps-title">Vamos paso a paso</h2>
             </div>
-            <div class="lesson-step-grid{% if leccion.slug == 'partes-computador' %} lesson-step-grid-illustrated{% endif %}">
+            <div class="lesson-step-grid{% if leccion.pasos and leccion.pasos[0].imagen %} lesson-step-grid-illustrated{% endif %}">
                 {% for paso in leccion.pasos %}
                     <article class="lesson-step-card">
                         <span class="lesson-step-number">{{ "%02d"|format(loop.index) }}</span>
@@ -71,7 +71,7 @@
                 <div>
                     <p class="learning-eyebrow">RECURSO OPCIONAL</p>
                     <h2 id="lesson-video-title">{{ leccion.video.titulo }}</h2>
-                    <p>Abre una búsqueda de Shorts en YouTube. Elige un video breve que muestre las partes del computador; puedes volver aquí al terminar.</p>
+                    <p>Se abrirán resultados de YouTube sobre este tema. Elige un Short educativo y verifica la información antes de aplicarla.</p>
                 </div>
                 <a href="{{ leccion.video.url }}" target="_blank" rel="noopener noreferrer">
                     Buscar Shorts en YouTube <span aria-hidden="true">↗</span>

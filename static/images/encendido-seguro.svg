@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Botón para encender el computador</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <rect x="58" y="30" width="204" height="120" rx="12" fill="#61283f"/>
+  <rect x="68" y="40" width="184" height="100" rx="7" fill="#fbf8f1"/>
+  <circle cx="160" cy="91" r="35" fill="#397568"/>
+  <path d="M160 61v29m-21-16a29 29 0 1 0 42 0" fill="none" stroke="#fbf8f1" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="235" cy="125" r="5" fill="#a83f78"/>
+</svg>

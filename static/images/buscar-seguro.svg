@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Búsqueda con verificación de información</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <rect x="37" y="39" width="220" height="46" rx="23" fill="#fbf8f1" stroke="#397568" stroke-width="4"/>
+  <circle cx="65" cy="62" r="10" fill="none" stroke="#61283f" stroke-width="4"/>
+  <path d="m73 70 8 8" stroke="#61283f" stroke-width="4" stroke-linecap="round"/>
+  <rect x="96" y="56" width="136" height="11" rx="5" fill="#b7cfc3"/>
+  <circle cx="218" cy="116" r="38" fill="#397568"/>
+  <path d="m201 116 12 12 24-27" fill="none" stroke="#fbf8f1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M52 108h119m-119 16h88" stroke="#d9cdbd" stroke-width="7" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Uso seguro de inteligencia artificial</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <path d="M160 25 235 53v43c0 36-31 55-75 71-44-16-75-35-75-71V53z" fill="#397568"/>
+  <path d="M160 43 218 64v31c0 26-23 41-58 55-35-14-58-29-58-55V64z" fill="#fbf8f1"/>
+  <rect x="127" y="83" width="66" height="48" rx="8" fill="#61283f"/>
+  <path d="M140 83V71a20 20 0 0 1 40 0v12" fill="none" stroke="#61283f" stroke-width="8"/>
+  <circle cx="160" cy="104" r="5" fill="#fbf8f1"/>
+  <path d="M160 109v9" stroke="#fbf8f1" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Protección de datos personales al usar inteligencia artificial</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <rect x="66" y="34" width="188" height="111" rx="12" fill="#fbf8f1" stroke="#d9cdbd" stroke-width="4"/>
+  <circle cx="131" cy="73" r="19" fill="#a83f78"/>
+  <path d="M98 119c5-27 61-27 66 0" fill="#a83f78"/>
+  <path d="M207 55 239 67v20c0 20-13 30-32 38-19-8-32-18-32-38V67z" fill="#397568"/>
+  <path d="m194 87 9 9 18-21" fill="none" stroke="#fbf8f1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

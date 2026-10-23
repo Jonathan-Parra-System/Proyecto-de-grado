@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Texto e imágenes creados con inteligencia artificial</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <path d="M50 31h117a12 12 0 0 1 12 12v76a12 12 0 0 1-12 12H91l-24 18v-18H50a12 12 0 0 1-12-12V43a12 12 0 0 1 12-12z" fill="#61283f"/>
+  <path d="M59 48h97m-97 15h81m-81 15h89m-89 15h60" stroke="#fbf8f1" stroke-width="6" stroke-linecap="round"/>
+  <rect x="190" y="53" width="91" height="82" rx="10" fill="#397568"/>
+  <circle cx="222" cy="80" r="10" fill="#f2e9d9"/>
+  <path d="m199 124 26-27 18 16 14-12 15 23z" fill="#a83f78"/>
+</svg>

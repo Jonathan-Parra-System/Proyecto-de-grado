@@ -40,11 +40,21 @@ EVALUACION_INICIAL = {
     ],
 }
 
+VERSION_CONTENIDO = "catalogo-pedagogico-ia-v1"
+
 
 def inicializar_contenido():
     conexion = conectar_db()
     cursor = conexion.cursor()
     try:
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS migraciones_contenido (
+                version VARCHAR(100) NOT NULL PRIMARY KEY,
+                aplicada_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB
+            """
+        )
         curso_ids = {}
         for slug, curso in CURSOS.items():
             cursor.execute(
@@ -111,6 +121,74 @@ def inicializar_contenido():
                     )
                 )
 
+        cursor.execute(
+            "SELECT version FROM migraciones_contenido WHERE version = %s",
+            (VERSION_CONTENIDO,)
+        )
+        if cursor.fetchone() is None:
+            for slug, curso in CURSOS.items():
+                cursor.execute(
+                    """
+                    UPDATE cursos
+                    SET titulo = %s, descripcion = %s
+                    WHERE slug = %s
+                    """,
+                    (curso["titulo"], curso["descripcion"], slug)
+                )
+
+            contador_por_curso = {}
+            for modulo in MODULOS:
+                curso_slug = modulo["curso"]
+                contador_por_curso[curso_slug] = contador_por_curso.get(curso_slug, 0) + 1
+                modulo_slug = f"{curso_slug}-modulo-{contador_por_curso[curso_slug]}"
+                cursor.execute(
+                    """
+                    UPDATE modulos
+                    SET titulo = %s, descripcion = %s, imagen = %s
+                    WHERE slug = %s
+                    """,
+                    (
+                        modulo["titulo"],
+                        modulo["descripcion"],
+                        modulo["imagen"],
+                        modulo_slug,
+                    )
+                )
+
+                for orden, leccion in enumerate(modulo["lecciones"], start=1):
+                    actividad = leccion["actividad"]
+                    opciones = [
+                        {"valor": valor, "etiqueta": etiqueta}
+                        for valor, etiqueta in actividad["opciones"]
+                    ]
+                    cursor.execute(
+                        """
+                        UPDATE lecciones
+                        SET titulo = %s, duracion = %s, introduccion = %s,
+                            objetivos = %s, pasos = %s,
+                            actividad_pregunta = %s, actividad_opciones = %s,
+                            actividad_respuesta = %s, orden = %s
+                        WHERE slug = %s
+                        """,
+                        (
+                            leccion["titulo"],
+                            leccion["duracion"],
+                            leccion["introduccion"],
+                            json.dumps(leccion["objetivos"], ensure_ascii=False),
+                            json.dumps(leccion["pasos"], ensure_ascii=False),
+                            actividad["pregunta"],
+                            json.dumps(opciones, ensure_ascii=False),
+                            actividad["respuesta"],
+                            orden,
+                            leccion["slug"],
+                        )
+                    )
+
+            cursor.execute(
+                "INSERT INTO migraciones_contenido (version) VALUES (%s)",
+                (VERSION_CONTENIDO,)
+            )
+
         curso_id = curso_ids[EVALUACION_INICIAL["curso"]]
         cursor.execute(
             """
@@ -161,4 +239,4 @@ def inicializar_contenido():
 
 if __name__ == "__main__":
     inicializar_contenido()
-    print("Contenido inicial creado sin sobrescribir cambios previos.")
+    print("Catálogo inicializado; la actualización pedagógica se aplica una sola vez.")

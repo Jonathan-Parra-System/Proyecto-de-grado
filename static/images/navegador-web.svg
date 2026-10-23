@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Ventana de un navegador web</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <rect x="35" y="34" width="250" height="112" rx="10" fill="#61283f"/>
+  <rect x="43" y="42" width="234" height="96" rx="6" fill="#fbf8f1"/>
+  <path d="M43 65h234" stroke="#61283f" stroke-width="7"/>
+  <circle cx="57" cy="54" r="4" fill="#a83f78"/><circle cx="70" cy="54" r="4" fill="#397568"/><circle cx="83" cy="54" r="4" fill="#d9cdbd"/>
+  <rect x="101" y="48" width="155" height="12" rx="6" fill="#e7efe7"/>
+  <rect x="58" y="80" width="85" height="45" rx="5" fill="#397568"/>
+  <path d="M158 84h96m-96 13h78m-78 13h89" stroke="#b7cfc3" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Carpetas para guardar archivos</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <path d="M42 57h91l17 18h126v67H42z" fill="#397568"/>
+  <path d="M42 72h234v70H42z" rx="8" fill="#a83f78"/>
+  <path d="M58 85h204v49H58z" fill="#fbf8f1"/>
+  <path d="M81 101h85m-85 13h132" stroke="#b7cfc3" stroke-width="7" stroke-linecap="round"/>
+  <rect x="194" y="93" width="49" height="30" rx="5" fill="#e7efe7"/>
+</svg>

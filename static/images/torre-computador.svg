@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title">
+  <title id="title">Interior de una torre de computador</title>
+  <rect width="320" height="180" rx="16" fill="#e7efe7"/>
+  <rect x="88" y="15" width="144" height="150" rx="12" fill="#61283f"/>
+  <rect x="98" y="25" width="124" height="130" rx="7" fill="#fbf8f1"/>
+  <rect x="111" y="38" width="70" height="70" rx="8" fill="#397568"/>
+  <rect x="128" y="55" width="36" height="36" rx="5" fill="#b7cfc3"/>
+  <path d="M122 73h-10m78 0h-10M146 50V40m0 78v-10m-20-35h-9m58 0h-9m-39-20-7-7m42 42-7-7m0-28 7-7m-42 42 7-7" stroke="#28594f" stroke-width="4" stroke-linecap="round"/>
+  <rect x="191" y="40" width="18" height="58" rx="4" fill="#a83f78"/>
+  <path d="M195 48h10m-10 12h10m-10 12h10m-10 12h10" stroke="#fbf8f1" stroke-width="3" stroke-linecap="round"/>
+  <rect x="112" y="120" width="97" height="8" rx="4" fill="#d9cdbd"/>
+  <circle cx="203" cy="143" r="5" fill="#397568"/>
+  <circle cx="119" cy="143" r="5" fill="#a83f78"/>
+</svg>

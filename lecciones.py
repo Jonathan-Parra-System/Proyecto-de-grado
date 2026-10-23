@@ -8,18 +8,44 @@ MODULOS = [
             {
                 "slug": "partes-computador",
                 "titulo": "Partes del computador",
-                "duracion": "5 min",
-                "introduccion": "Un computador recibe datos, los procesa y muestra resultados. Sus partes trabajan juntas para ayudarte a estudiar, crear y comunicarte.",
+                "duracion": "8 min",
+                "introduccion": "Un computador recibe información, la procesa y muestra resultados. En esta guía reconocerás cada pieza con ejemplos cotidianos y aprenderás a distinguir una torre de un equipo Todo en uno.",
                 "objetivos": [
-                    "Reconocer monitor, teclado, mouse y CPU.",
-                    "Identificar para qué sirve cada componente.",
-                    "Relacionar cada parte con una tarea cotidiana.",
+                    "Distinguir los dispositivos de entrada y de salida.",
+                    "Reconocer el monitor, el teclado, el mouse y la torre.",
+                    "Diferenciar el procesador (CPU) de la torre que lo contiene.",
+                    "Identificar un computador Todo en uno y sus conexiones.",
                 ],
                 "pasos": [
-                    {"titulo": "Monitor", "texto": "Muestra textos, imágenes y videos. Es la pantalla que permite ver lo que haces."},
-                    {"titulo": "Teclado y mouse", "texto": "El teclado sirve para escribir; el mouse permite mover el puntero, seleccionar y abrir elementos."},
-                    {"titulo": "CPU o torre", "texto": "Procesa instrucciones y coordina muchas de las tareas del computador. En un portátil sus componentes están integrados."},
+                    {
+                        "titulo": "Monitor: donde ves el resultado",
+                        "texto": "Es un dispositivo de salida: muestra documentos, fotografías y mensajes. Si apagas el monitor pero la torre sigue encendida, el computador puede continuar funcionando.",
+                        "imagen": "monitor-computador.svg",
+                        "imagen_alt": "Ilustración de un monitor mostrando un documento y una fotografía",
+                    },
+                    {
+                        "titulo": "Teclado y mouse: cómo das instrucciones",
+                        "texto": "Son dispositivos de entrada. Con el teclado escribes; con el mouse mueves el puntero, haces clic para seleccionar y doble clic para abrir algunos elementos.",
+                        "imagen": "teclado-mouse.svg",
+                        "imagen_alt": "Ilustración de un teclado y un mouse",
+                    },
+                    {
+                        "titulo": "Torre y procesador (CPU)",
+                        "texto": "La torre o gabinete contiene componentes como la placa base, la memoria RAM, el almacenamiento y el procesador. Técnicamente, la CPU es el procesador dentro del equipo, no la torre completa.",
+                        "imagen": "torre-computador.svg",
+                        "imagen_alt": "Ilustración de una torre de computador abierta que muestra sus componentes",
+                    },
+                    {
+                        "titulo": "Todo en uno: computador y pantalla integrados",
+                        "texto": "En este modelo, la mayoría de los componentes está detrás de la pantalla, por eso necesita menos cables y ocupa menos espacio. El teclado y el mouse suelen ir aparte. Busca el botón de encendido y los puertos en los bordes o en la parte posterior.",
+                        "imagen": "todo-en-uno.svg",
+                        "imagen_alt": "Ilustración de un computador Todo en uno con teclado y mouse externos",
+                    },
                 ],
+                "video": {
+                    "titulo": "Video corto: partes del computador y Todo en uno",
+                    "url": "https://www.youtube.com/results?search_query=shorts+partes+del+computador+todo+en+uno+espa%C3%B1ol",
+                },
                 "actividad": {
                     "pregunta": "¿Qué componente usarías para escribir tu nombre en un documento?",
                     "opciones": [("monitor", "El monitor"), ("teclado", "El teclado"), ("parlantes", "Los parlantes")],

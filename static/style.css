@@ -1792,6 +1792,15 @@ form button {
     gap: 14px;
 }
 
+.lesson-step-grid-illustrated {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lesson-step-grid-illustrated .lesson-step-card p {
+    font-size: 16px;
+    line-height: 1.7;
+}
+
 .lesson-step-card {
     position: relative;
     min-height: 160px;
@@ -1799,6 +1808,17 @@ form button {
     border: 1px solid #ded3c5;
     border-radius: 11px;
     background: var(--learning-beige-light);
+}
+
+.lesson-step-image {
+    display: block;
+    width: 100%;
+    height: 142px;
+    margin: 0 0 15px;
+    padding: 8px;
+    border-radius: 9px;
+    background: #e7efe7;
+    object-fit: contain;
 }
 
 .lesson-step-number {
@@ -1826,6 +1846,46 @@ form button {
     color: #5c5355;
     font-size: 14px;
     line-height: 1.6;
+}
+
+.lesson-video-resource {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 22px;
+    padding: 22px 25px;
+    border: 1px solid #d2dfd4;
+    border-radius: 12px;
+    background: #e7efe7;
+}
+
+.lesson-video-resource h2 {
+    margin: 0 0 6px;
+    color: var(--learning-wine);
+    font-family: Georgia, serif;
+    font-size: 21px;
+}
+
+.learning-page .lesson-video-resource p:last-child {
+    margin: 0;
+    color: #51494b;
+    font-size: 14px;
+}
+
+.lesson-video-resource > a {
+    flex: 0 0 auto;
+    padding: 11px 16px;
+    border-radius: 8px;
+    background: var(--learning-opal);
+    color: var(--learning-beige-light);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.lesson-video-resource > a:hover {
+    background: var(--learning-opal-dark);
 }
 
 .lesson-activity {
@@ -2349,6 +2409,12 @@ input:focus {
     .lesson-objectives ul,
     .lesson-step-grid {
         grid-template-columns: 1fr;
+    }
+
+    .lesson-video-resource {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
     }
 
     .lesson-step-card {

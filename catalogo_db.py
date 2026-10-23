@@ -1,5 +1,7 @@
 import json
 
+from lecciones import LECCIONES
+
 
 def cargar_catalogo(cursor, incluir_inactivos=False):
     filtro_curso = "" if incluir_inactivos else "WHERE activo = 1"
@@ -74,6 +76,13 @@ def cargar_catalogo(cursor, incluir_inactivos=False):
         leccion = dict(fila)
         leccion["objetivos"] = _leer_json(leccion["objetivos"])
         leccion["pasos"] = _leer_json(leccion["pasos"])
+        if leccion["slug"] == "partes-computador":
+            contenido_actualizado = LECCIONES["partes-computador"]
+            leccion["duracion"] = contenido_actualizado["duracion"]
+            leccion["introduccion"] = contenido_actualizado["introduccion"]
+            leccion["objetivos"] = contenido_actualizado["objetivos"]
+            leccion["pasos"] = contenido_actualizado["pasos"]
+            leccion["video"] = contenido_actualizado["video"]
         leccion["actividad"] = {
             "pregunta": leccion.pop("actividad_pregunta"),
             "opciones": [

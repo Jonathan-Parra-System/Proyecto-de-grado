@@ -8,6 +8,7 @@ import re
 import secrets
 import smtplib
 import ssl
+import threading
 import unicodedata
 from datetime import date
 from email.message import EmailMessage
@@ -19,12 +20,29 @@ import mysql.connector
 from flask import Flask, abort, flash, render_template, request, session, redirect, url_for
 from conexion import conectar_db
 from catalogo_db import cargar_catalogo, cargar_evaluaciones
+from inicializar_contenido import inicializar_contenido
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 if not app.secret_key:
     raise RuntimeError("Falta configurar FLASK_SECRET_KEY en el archivo .env")
+
+_catalogo_inicializado = False
+_catalogo_inicializacion_lock = threading.Lock()
+
+
+def _asegurar_catalogo_inicializado():
+    global _catalogo_inicializado
+    if _catalogo_inicializado:
+        return
+
+    with _catalogo_inicializacion_lock:
+        if _catalogo_inicializado:
+            return
+        inicializar_contenido()
+        _catalogo_inicializado = True
+        logging.info("Catálogo de cursos y lecciones inicializado.")
 
 
 def iniciar_sesion_requerida(vista):
@@ -416,6 +434,7 @@ def _imagenes_disponibles():
 
 
 def _obtener_catalogo(incluir_inactivos=False):
+    _asegurar_catalogo_inicializado()
     conexion = conectar_db()
     cursor = conexion.cursor(dictionary=True)
     try:

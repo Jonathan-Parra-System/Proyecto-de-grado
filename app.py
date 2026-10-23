@@ -1283,11 +1283,18 @@ def admin_reporte_estudiante(usuario_id):
     incorrectas = int(estadisticas["incorrectas"] or 0)
     total_respuestas = correctas + incorrectas
     if total_respuestas:
-        angulo = 360 * correctas / total_respuestas
-        pdf.setFillColor(verde)
-        pdf.wedge(62, y_chart_bottom + 12, 132, y_chart_bottom + 82, 0, angulo, fill=1, stroke=0)
-        pdf.setFillColor(magenta)
-        pdf.wedge(62, y_chart_bottom + 12, 132, y_chart_bottom + 82, angulo, 360 - angulo, fill=1, stroke=0)
+        if not incorrectas:
+            pdf.setFillColor(verde)
+            pdf.circle(97, y_chart_bottom + 47, 35, fill=1, stroke=0)
+        elif not correctas:
+            pdf.setFillColor(magenta)
+            pdf.circle(97, y_chart_bottom + 47, 35, fill=1, stroke=0)
+        else:
+            angulo = 360 * correctas / total_respuestas
+            pdf.setFillColor(verde)
+            pdf.wedge(62, y_chart_bottom + 12, 132, y_chart_bottom + 82, 0, angulo, fill=1, stroke=0)
+            pdf.setFillColor(magenta)
+            pdf.wedge(62, y_chart_bottom + 12, 132, y_chart_bottom + 82, angulo, 360 - angulo, fill=1, stroke=0)
     else:
         pdf.setFillColor(colors.HexColor("#e5dccf"))
         pdf.circle(97, y_chart_bottom + 47, 35, fill=1, stroke=0)

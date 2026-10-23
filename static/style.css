@@ -257,6 +257,11 @@ form button {
     object-fit: contain;
 }
 
+.login-brand-copy {
+    display: grid;
+    gap: 2px;
+}
+
 .login-header-caption {
     color: var(--login-beige);
     font-size: 15px;
@@ -2430,28 +2435,32 @@ input:focus {
     }
 
     .login-header {
-        min-height: 60px;
-        padding: 0 110px 0 20px;
+        min-height: 84px;
+        padding: 8px 88px 8px 12px;
     }
 
     .login-header .uts-header-logo {
-        right: 16px;
-        width: 82px;
-        max-height: 52px;
+        right: 10px;
+        width: 68px;
+        max-height: 38px;
     }
 
     .login-brand {
-        font-size: 17px;
-        gap: 8px;
+        font-size: 15px;
+        gap: 6px;
     }
 
     .login-brand-logo {
-        width: 52px;
-        max-height: 32px;
+        width: 44px;
+        max-height: 30px;
     }
 
     .login-header-caption {
-        display: none;
+        font-size: 12px;
+    }
+
+    .login-layout {
+        min-height: calc(100vh - 84px);
     }
 
     .site-header-content {

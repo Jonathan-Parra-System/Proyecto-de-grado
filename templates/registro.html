@@ -6,16 +6,18 @@
     <title>Crear cuenta | Plataforma Educativa</title>
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico', v=2) }}" sizes="any">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-jpa.png', v=2) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=5) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=6) }}">
 </head>
 <body class="login-page">
     <header class="login-header">
         <div class="login-header-copy">
             <a class="login-brand" href="{{ url_for('inicio') }}">
                 <img class="login-brand-logo" src="{{ url_for('static', filename='images/logo-sistemas.png', v=1) }}" alt="Ingeniería de Sistemas, UTS" width="1102" height="466">
-                <span>Plataforma Educativa</span>
+                <span class="login-brand-copy">
+                    <span>Plataforma Educativa</span>
+                    <span class="login-header-caption">Aprende a tu ritmo</span>
+                </span>
             </a>
-            <span class="login-header-caption">Aprende a tu ritmo</span>
         </div>
         <img class="uts-header-logo" src="{{ url_for('static', filename='images/uts-logo.png', v=5) }}" alt="Unidades Tecnológicas de Santander, UTS" width="1730" height="768">
     </header>

@@ -7,13 +7,13 @@
     <title>Seguridad de la cuenta | Plataforma Educativa</title>
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico', v=3) }}" sizes="any">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-jpa.png', v=3) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=4) }}">
 </head>
 <body class="login-page">
     <header class="login-header">
         <div class="login-header-copy">
             <a class="login-brand" href="{{ url_for('inicio') }}">
-                <span class="login-brand-icon" aria-hidden="true">▰</span>
+                <img class="login-brand-logo" src="{{ url_for('static', filename='images/logo-sistemas.png', v=1) }}" alt="Ingeniería de Sistemas, UTS" width="1102" height="466">
                 <span>Plataforma Educativa</span>
             </a>
             <span class="login-header-caption">Seguridad de tu cuenta</span>

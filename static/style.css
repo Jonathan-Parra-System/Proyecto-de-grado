@@ -250,15 +250,11 @@ form button {
     text-decoration: none;
 }
 
-.login-brand-icon {
-    display: grid;
-    width: 31px;
-    height: 31px;
-    place-items: center;
-    border-radius: 8px;
-    background: var(--login-magenta);
-    color: #fff;
-    font-size: 16px;
+.login-brand-logo {
+    width: clamp(56px, 8vw, 90px);
+    max-height: 42px;
+    height: auto;
+    object-fit: contain;
 }
 
 .login-header-caption {
@@ -874,6 +870,17 @@ form button {
 
 .site-header-copy {
     text-align: center;
+}
+
+.sistemas-header-logo {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    width: min(190px, 24vw);
+    max-height: 116px;
+    height: auto;
+    transform: translateY(-50%);
+    object-fit: contain;
 }
 
 .uts-header-logo {
@@ -2433,6 +2440,12 @@ input:focus {
 
     .login-brand {
         font-size: 17px;
+        gap: 8px;
+    }
+
+    .login-brand-logo {
+        width: 52px;
+        max-height: 32px;
     }
 
     .login-header-caption {
@@ -2441,7 +2454,13 @@ input:focus {
 
     .site-header-content {
         min-height: 80px;
-        padding: 0 78px 0 0;
+        padding: 0 78px;
+    }
+
+    .sistemas-header-logo {
+        left: 4px;
+        width: 66px;
+        max-height: 46px;
     }
 
     .uts-header-logo {
@@ -2459,7 +2478,7 @@ input:focus {
     }
 
     .learning-page .home-site-header h1 {
-        font-size: 22px;
+        font-size: clamp(17px, 5.5vw, 22px);
     }
 
     .learning-page .home-site-header p {

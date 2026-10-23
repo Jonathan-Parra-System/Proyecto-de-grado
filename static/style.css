@@ -229,7 +229,7 @@ form button {
 
 .login-header {
     position: relative;
-    min-height: 68px;
+    min-height: 112px;
     padding: 0 5.5%;
     display: flex;
     align-items: center;
@@ -251,8 +251,8 @@ form button {
 }
 
 .login-brand-logo {
-    width: clamp(56px, 8vw, 90px);
-    max-height: 42px;
+    width: clamp(72px, 9vw, 112px);
+    max-height: 50px;
     height: auto;
     object-fit: contain;
 }
@@ -265,7 +265,7 @@ form button {
 .login-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.88fr);
-    min-height: calc(100vh - 68px);
+    min-height: calc(100vh - 112px);
     width: 100%;
     max-width: none;
     margin: 0;
@@ -1035,6 +1035,8 @@ form button {
 
 .login-header .uts-header-logo {
     right: 5.5%;
+    width: min(170px, 20vw);
+    max-height: 76px;
 }
 
 .login-author-logo {

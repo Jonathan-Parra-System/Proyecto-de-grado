@@ -47,6 +47,22 @@ def inicializar_contenido():
     conexion = conectar_db()
     cursor = conexion.cursor()
     try:
+        cursor.execute("SHOW COLUMNS FROM usuarios LIKE 'nombre_completo'")
+        if cursor.fetchone() is None:
+            cursor.execute(
+                "ALTER TABLE usuarios ADD COLUMN nombre_completo VARCHAR(120) NULL"
+            )
+        cursor.execute("SHOW COLUMNS FROM usuarios LIKE 'avatar_id'")
+        if cursor.fetchone() is None:
+            cursor.execute(
+                "ALTER TABLE usuarios ADD COLUMN avatar_id VARCHAR(32) NULL"
+            )
+        cursor.execute("SHOW COLUMNS FROM usuarios LIKE 'foto_perfil'")
+        if cursor.fetchone() is None:
+            cursor.execute(
+                "ALTER TABLE usuarios ADD COLUMN foto_perfil MEDIUMBLOB NULL"
+            )
+
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS migraciones_contenido (

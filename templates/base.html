@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
         <title>{% block title %}Plataforma Educativa{% endblock %}</title> 
         <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico', v=2) }}" sizes="any">
-        <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-jpa.png', v=2) }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=6) }}">
     </head> 
     <body class="learning-page {% block page_class %}{% endblock %}"> 
@@ -42,6 +41,7 @@
             <a href="{{ url_for('panel') }}">Panel</a>
             <a href="{{ url_for('progreso') }}">Mi progreso</a>
             {% if session.get('usuario_id') %}
+            <a href="{{ url_for('perfil') }}">Mi perfil</a>
             <a href="{{ url_for('evaluacion') }}">Evaluaciones</a>
             <a href="{{ url_for('logout') }}">Cerrar sesión</a>
             {% endif %}

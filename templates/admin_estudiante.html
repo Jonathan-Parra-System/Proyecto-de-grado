@@ -10,6 +10,19 @@
         <div>
             <p class="learning-eyebrow">FICHA DE APRENDIZAJE</p>
             <h1 id="student-title">{{ estudiante.usuario }}</h1>
+            <div class="admin-student-profile">
+                {% if estudiante.foto_perfil %}
+                    <img src="{{ url_for('perfil_foto', usuario_id=estudiante.id) }}" alt="Foto de perfil de {{ estudiante.nombre_completo or estudiante.usuario }}">
+                {% else %}
+                    <img src="{{ url_for('perfil_avatar', avatar_id=estudiante.avatar_id or 'avatar-hombre-1') }}" alt="Avatar de {{ estudiante.nombre_completo or estudiante.usuario }}">
+                {% endif %}
+                <div>
+                    <strong>{{ estudiante.nombre_completo or "Nombre no registrado" }}</strong>
+                    <span>{{ estudiante.edad if estudiante.edad is not none else "Edad no registrada" }}{% if estudiante.edad is not none %} años{% endif %}</span>
+                    <span>{{ estudiante.email or "Correo no registrado" }}</span>
+                    <span>{{ estudiante.celular or "Celular no registrado" }}</span>
+                </div>
+            </div>
             <p>
                 Último inicio de sesión:
                 {% if estudiante.ultimo_inicio_sesion %}
@@ -19,6 +32,7 @@
                 {% endif %}
             </p>
         </div>
+        <a class="profile-report-link" href="{{ url_for('admin_reporte_estudiante', usuario_id=estudiante.id) }}">Descargar informe PDF</a>
     </section>
 
     <section class="admin-detail-summary" aria-label="Resumen individual">

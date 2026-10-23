@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Mi perfil | Plataforma Educativa{% endblock %}
+{% block main_class %}profile-main{% endblock %}
+
+{% block content %}
+<section class="profile-shell" aria-labelledby="profile-title">
+    <a class="admin-back-link" href="{{ url_for('panel') }}">← Volver al panel</a>
+    <div class="profile-heading">
+        <p class="learning-eyebrow">TU CUENTA</p>
+        <h1 id="profile-title">Mi perfil</h1>
+        <p>Personaliza tus datos y elige una foto o un avatar para identificarte.</p>
+    </div>
+
+    <form class="profile-form" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="profile-current">
+            {% if usuario.foto_perfil %}
+                <img class="profile-current-image" src="{{ url_for('perfil_foto', usuario_id=session['usuario_id']) }}" alt="Foto de perfil actual">
+            {% else %}
+                <img class="profile-current-image" src="{{ url_for('perfil_avatar', avatar_id=usuario.avatar_id) }}" alt="Avatar actual: {{ usuario.nombre_visible }}">
+            {% endif %}
+            <div>
+                <strong>{{ usuario.nombre_visible }}</strong>
+                <span>Nombre de usuario: {{ usuario.usuario }}</span>
+            </div>
+        </div>
+
+        <div class="profile-fields">
+            <label>
+                Nombre completo
+                <input type="text" name="nombre_completo" value="{{ usuario.nombre_completo or '' }}" maxlength="120" autocomplete="name" required>
+            </label>
+            <label>
+                Edad
+                <input type="number" name="edad" value="{{ usuario.edad if usuario.edad is not none else '' }}" min="18" max="120" inputmode="numeric" required>
+            </label>
+        </div>
+
+        <section class="profile-photo-picker" aria-labelledby="photo-title">
+            <h2 id="photo-title">Subir una foto</h2>
+            <p>Desde tu computador o la galería de tu celular. Se aceptan JPG, PNG o WEBP de hasta 5 MB.</p>
+            <label class="profile-upload">
+                <span>Elegir foto</span>
+                <input type="file" name="foto_perfil" accept="image/jpeg,image/png,image/webp">
+            </label>
+        </section>
+
+        <fieldset class="profile-avatar-picker">
+            <legend>O elegir uno de los 12 avatares</legend>
+            <p>Si subes una foto, esta reemplazará el avatar seleccionado.</p>
+            <div class="profile-avatar-grid">
+                {% for avatar in avatares %}
+                    <label class="profile-avatar-option">
+                        <input type="radio" name="avatar_id" value="{{ avatar.id }}" {% if usuario.avatar_id == avatar.id %}checked{% endif %}>
+                        <img src="{{ url_for('perfil_avatar', avatar_id=avatar.id) }}" alt="" loading="lazy">
+                        <span>{{ avatar.nombre }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <button class="profile-save-button" type="submit">Guardar perfil</button>
+    </form>
+</section>
+{% endblock %}

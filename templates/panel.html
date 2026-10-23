@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel principal | Plataforma Educativa</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico', v=2) }}" sizes="any">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="panel-page">
@@ -12,7 +13,17 @@
             <span class="panel-brand-icon" aria-hidden="true">▰</span>
             <span>Plataforma Educativa</span>
         </a>
-        <a class="panel-logout" href="{{ url_for('logout') }}">Cerrar sesión</a>
+        <div class="panel-account-actions">
+            <a class="panel-profile-link" href="{{ url_for('perfil') }}">
+                {% if perfil_resumen.get('foto_perfil') %}
+                    <img src="{{ url_for('perfil_foto', usuario_id=session['usuario_id']) }}" alt="">
+                {% else %}
+                    <img src="{{ url_for('perfil_avatar', avatar_id=perfil_resumen.get('avatar_id') or 'avatar-hombre-1') }}" alt="">
+                {% endif %}
+                <span>Mi perfil</span>
+            </a>
+            <a class="panel-logout" href="{{ url_for('logout') }}">Cerrar sesión</a>
+        </div>
     </header>
 
     <main class="panel-main">

@@ -618,6 +618,31 @@ form button {
     background: rgba(255, 255, 255, 0.12);
 }
 
+.panel-account-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.panel-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.panel-profile-link img {
+    width: 36px;
+    height: 36px;
+    border: 2px solid rgb(255 255 255 / 70%);
+    border-radius: 50%;
+    background: #e7efe7;
+    object-fit: cover;
+}
+
 .panel-main {
     width: min(1120px, calc(100% - 48px));
     max-width: none;
@@ -2762,6 +2787,228 @@ input:focus {
 
 .admin-student-detail {
     padding-top: 26px;
+}
+
+.profile-main {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 36px 24px 64px;
+}
+
+.profile-shell {
+    display: grid;
+    gap: 22px;
+}
+
+.profile-heading h1 {
+    margin: 0 0 8px;
+    color: var(--panel-wine, #61283f);
+}
+
+.profile-heading > p:last-child,
+.profile-photo-picker p,
+.profile-avatar-picker > p {
+    color: #625b57;
+}
+
+.profile-form {
+    display: grid;
+    gap: 24px;
+    padding: clamp(20px, 4vw, 36px);
+    border: 1px solid #eadfd5;
+    border-radius: 20px;
+    background: #fffdf9;
+    box-shadow: 0 14px 38px rgb(74 50 40 / 8%);
+}
+
+.profile-current {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.profile-current-image,
+.admin-student-profile img {
+    width: 88px;
+    height: 88px;
+    flex: 0 0 auto;
+    border: 3px solid #e5d7ca;
+    border-radius: 50%;
+    background: #e7efe7;
+    object-fit: cover;
+}
+
+.profile-current > div,
+.admin-student-profile > div {
+    display: grid;
+    gap: 5px;
+}
+
+.profile-current strong {
+    color: #61283f;
+    font-size: 1.2rem;
+}
+
+.profile-current span,
+.admin-student-profile span {
+    color: #625b57;
+}
+
+.profile-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr);
+    gap: 18px;
+}
+
+.profile-fields label {
+    display: grid;
+    gap: 8px;
+    color: #45383a;
+    font-weight: 700;
+}
+
+.profile-fields input {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 13px;
+    border: 1px solid #cfc2b8;
+    border-radius: 9px;
+    background: white;
+    font: inherit;
+}
+
+.profile-photo-picker h2,
+.profile-avatar-picker legend {
+    color: #61283f;
+    font-size: 1.15rem;
+    font-weight: 750;
+}
+
+.profile-upload {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 1px solid #397568;
+    border-radius: 9px;
+    color: #24594e;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.profile-upload input {
+    max-width: min(100%, 260px);
+    margin-left: 12px;
+}
+
+.profile-avatar-picker {
+    min-width: 0;
+    margin: 0;
+    padding: 20px;
+    border: 1px solid #e2d8cf;
+    border-radius: 14px;
+}
+
+.profile-avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 12px;
+}
+
+.profile-avatar-option {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    padding: 10px 8px;
+    border: 1px solid #e3d9d0;
+    border-radius: 12px;
+    background: #fff;
+    color: #45383a;
+    text-align: center;
+    cursor: pointer;
+}
+
+.profile-avatar-option:has(input:checked) {
+    border-color: #397568;
+    background: #eff6f1;
+    box-shadow: 0 0 0 2px rgb(57 117 104 / 18%);
+}
+
+.profile-avatar-option input {
+    accent-color: #397568;
+}
+
+.profile-avatar-option img {
+    width: 76px;
+    height: 88px;
+    border-radius: 12px;
+}
+
+.profile-avatar-option span {
+    font-size: .82rem;
+}
+
+.profile-save-button,
+.profile-report-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    min-height: 46px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 9px;
+    background: #61283f;
+    color: white;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.profile-report-link {
+    align-self: start;
+    background: #397568;
+}
+
+.admin-student-profile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 18px 0;
+}
+
+@media (max-width: 600px) {
+    .profile-main {
+        padding: 24px 15px 40px;
+    }
+
+    .profile-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .profile-upload {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .profile-upload input {
+        margin-left: 0;
+    }
+
+    .panel-account-actions {
+        gap: 8px;
+    }
+
+    .panel-profile-link {
+        gap: 5px;
+        font-size: 12px;
+    }
 }
 
 .admin-back-link {

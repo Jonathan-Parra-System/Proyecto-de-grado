@@ -2,6 +2,7 @@ import os
 import hmac
 import hashlib
 import html
+import io
 import json
 import logging
 import re
@@ -17,13 +18,20 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 import mysql.connector
-from flask import Flask, abort, flash, render_template, request, session, redirect, url_for
+from flask import Flask, Response, abort, flash, render_template, request, session, redirect, send_file, url_for
 from conexion import conectar_db
 from catalogo_db import cargar_catalogo, cargar_evaluaciones
 from inicializar_contenido import inicializar_contenido
+from perfiles import AVATARES, AVATAR_PREDETERMINADO, avatar_valido, generar_avatar_svg, obtener_avatar
+from PIL import Image, ImageOps, UnidentifiedImageError
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 if not app.secret_key:
     raise RuntimeError("Falta configurar FLASK_SECRET_KEY en el archivo .env")
@@ -479,6 +487,29 @@ def obtener_lecciones_completadas(usuario_id):
     finally:
         cursor.close()
         conexion.close()
+
+
+def _procesar_foto_perfil(archivo):
+    if archivo is None or not archivo.filename:
+        return None
+    contenido = archivo.read(5 * 1024 * 1024 + 1)
+    if len(contenido) > 5 * 1024 * 1024:
+        raise ValueError("La foto debe pesar 5 MB o menos.")
+    try:
+        with Image.open(io.BytesIO(contenido)) as imagen:
+            if imagen.format not in {"JPEG", "PNG", "WEBP"}:
+                raise ValueError("Usa una imagen JPG, PNG o WEBP.")
+            if imagen.width * imagen.height > 25_000_000:
+                raise ValueError("La resolución de la foto es demasiado grande.")
+            imagen.verify()
+        with Image.open(io.BytesIO(contenido)) as imagen:
+            imagen = ImageOps.exif_transpose(imagen).convert("RGB")
+            imagen.thumbnail((640, 640), Image.Resampling.LANCZOS)
+            salida = io.BytesIO()
+            imagen.save(salida, format="JPEG", quality=86, optimize=True)
+            return salida.getvalue()
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as error:
+        raise ValueError("No se pudo leer la imagen. Selecciona una foto JPG, PNG o WEBP válida.") from error
 
 
 @app.context_processor
@@ -941,15 +972,369 @@ def panel():
         slug for orden in ordenes.values() for slug in orden
     ))
     porcentaje = int((completadas / total_lecciones) * 100) if total_lecciones else 0
+    conexion = conectar_db()
+    cursor = conexion.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            """
+            SELECT nombre_completo, avatar_id, foto_perfil
+            FROM usuarios WHERE id = %s
+            """,
+            (session["usuario_id"],)
+        )
+        perfil_resumen = cursor.fetchone() or {}
+    finally:
+        cursor.close()
+        conexion.close()
+    usuario = perfil_resumen.get("nombre_completo") or usuario
 
     return render_template(
         'panel.html',
         usuario=usuario,
+        perfil_resumen=perfil_resumen,
         lecciones_completadas=completadas,
         total_lecciones=total_lecciones,
         porcentaje=porcentaje,
         cursos=cursos,
     )
+
+
+@app.route("/perfil", methods=["GET", "POST"])
+@estudiante_requerido
+def perfil():
+    _asegurar_catalogo_inicializado()
+    usuario_id = session["usuario_id"]
+    if request.method == "POST":
+        validar_csrf()
+        nombre = request.form.get("nombre_completo", "").strip()
+        edad_texto = request.form.get("edad", "").strip()
+        avatar_id = request.form.get("avatar_id", "")
+        try:
+            edad = int(edad_texto)
+            if not nombre or len(nombre) > 120:
+                raise ValueError("Escribe tu nombre completo (máximo 120 caracteres).")
+            if not 18 <= edad <= 120:
+                raise ValueError("La edad debe estar entre 18 y 120 años.")
+            foto = _procesar_foto_perfil(request.files.get("foto_perfil"))
+            if foto is None and not avatar_valido(avatar_id):
+                raise ValueError("Selecciona uno de los avatares disponibles.")
+        except ValueError as error:
+            flash(str(error), "error")
+            return redirect(url_for("perfil"))
+
+        conexion = conectar_db()
+        cursor = conexion.cursor()
+        try:
+            cursor.execute(
+                """
+                UPDATE usuarios
+                SET nombre_completo = %s, edad = %s, avatar_id = %s, foto_perfil = %s
+                WHERE id = %s AND rol = 'estudiante'
+                """,
+                (nombre, edad, None if foto else avatar_id, foto, usuario_id)
+            )
+            if cursor.rowcount != 1:
+                abort(404)
+            conexion.commit()
+        except Exception:
+            conexion.rollback()
+            raise
+        finally:
+            cursor.close()
+            conexion.close()
+        session["nombre_completo"] = nombre
+        flash("Tu perfil se actualizó correctamente.", "success")
+        return redirect(url_for("perfil"))
+
+    conexion = conectar_db()
+    cursor = conexion.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            """
+            SELECT usuario, nombre_completo, edad, avatar_id, foto_perfil
+            FROM usuarios
+            WHERE id = %s AND rol = 'estudiante'
+            """,
+            (usuario_id,)
+        )
+        usuario = cursor.fetchone()
+    finally:
+        cursor.close()
+        conexion.close()
+    if usuario is None:
+        abort(404)
+    usuario["nombre_visible"] = usuario["nombre_completo"] or usuario["usuario"]
+    usuario["avatar_id"] = usuario["avatar_id"] or AVATAR_PREDETERMINADO
+    return render_template("perfil.html", usuario=usuario, avatares=AVATARES)
+
+
+@app.route("/perfil/avatar/<avatar_id>.svg")
+def perfil_avatar(avatar_id):
+    if not avatar_valido(avatar_id):
+        abort(404)
+    return Response(generar_avatar_svg(avatar_id), mimetype="image/svg+xml")
+
+
+@app.route("/perfil/foto/<int:usuario_id>")
+@iniciar_sesion_requerida
+def perfil_foto(usuario_id):
+    rol = _rol_usuario_actual()
+    if rol is None:
+        session.clear()
+        return redirect(url_for("login"))
+    if usuario_id != session["usuario_id"] and rol != "admin":
+        abort(403)
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    try:
+        cursor.execute(
+            "SELECT foto_perfil FROM usuarios WHERE id = %s",
+            (usuario_id,)
+        )
+        resultado = cursor.fetchone()
+    finally:
+        cursor.close()
+        conexion.close()
+    if resultado is None or not resultado[0]:
+        abort(404)
+    return send_file(io.BytesIO(resultado[0]), mimetype="image/jpeg", max_age=0)
+
+
+@app.route("/admin/estudiante/<int:usuario_id>/reporte.pdf")
+@administrador_requerido
+def admin_reporte_estudiante(usuario_id):
+    _asegurar_catalogo_inicializado()
+    conexion = conectar_db()
+    cursor = conexion.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            """
+            SELECT id, usuario, nombre_completo, email, celular, genero, edad,
+                   avatar_id, foto_perfil, ultimo_inicio_sesion
+            FROM usuarios
+            WHERE id = %s AND rol = 'estudiante' AND activo = 1
+            """,
+            (usuario_id,)
+        )
+        estudiante = cursor.fetchone()
+        if estudiante is None:
+            abort(404)
+        cursor.execute(
+            """
+            SELECT leccion_slug, completada, intentos, ultima_actividad
+            FROM progreso_lecciones
+            WHERE usuario_id = %s
+            """,
+            (usuario_id,)
+        )
+        progreso = {fila["leccion_slug"]: fila for fila in cursor.fetchall()}
+        cursor.execute(
+            """
+            SELECT COALESCE(SUM(puntos), 0) AS correctas,
+                   COALESCE(SUM(total_preguntas - puntos), 0) AS incorrectas,
+                   COUNT(*) AS cantidad,
+                   COALESCE(MAX(creado_en), NULL) AS ultima_evaluacion
+            FROM resultados_evaluaciones
+            WHERE usuario_id = %s
+            """,
+            (usuario_id,)
+        )
+        estadisticas = cursor.fetchone()
+        cursor.execute(
+            """
+            SELECT e.titulo, r.puntos, r.total_preguntas, r.creado_en
+            FROM resultados_evaluaciones r
+            LEFT JOIN evaluaciones e ON e.slug = r.evaluacion_slug
+            WHERE r.usuario_id = %s
+            ORDER BY r.creado_en DESC, r.id DESC
+            """,
+            (usuario_id,)
+        )
+        evaluaciones = cursor.fetchall()
+        cursor.execute("SELECT COUNT(*) AS usuarios FROM usuarios WHERE activo = 1")
+        total_usuarios = cursor.fetchone()["usuarios"]
+    finally:
+        cursor.close()
+        conexion.close()
+
+    cursos, lecciones, ordenes = _obtener_catalogo(incluir_inactivos=True)
+    progreso_cursos = []
+    completadas = 0
+    intentos = 0
+    ultima_actividad = estudiante["ultimo_inicio_sesion"]
+    for slug_curso, curso in cursos.items():
+        slugs = ordenes.get(slug_curso, [])
+        hechas = sum(bool(progreso.get(slug, {}).get("completada")) for slug in slugs)
+        completadas += hechas
+        progreso_cursos.append((curso["titulo"], hechas, len(slugs)))
+        for slug in slugs:
+            fila = progreso.get(slug)
+            if fila:
+                intentos += fila["intentos"]
+                if fila["ultima_actividad"] and (
+                    ultima_actividad is None or fila["ultima_actividad"] > ultima_actividad
+                ):
+                    ultima_actividad = fila["ultima_actividad"]
+
+    salida = io.BytesIO()
+    pdf = canvas.Canvas(salida, pagesize=letter)
+    ancho, alto = letter
+    vino = colors.HexColor("#61283f")
+    verde = colors.HexColor("#397568")
+    magenta = colors.HexColor("#a83f78")
+    gris = colors.HexColor("#51494b")
+    pdf.setTitle(f"Reporte de aprendizaje - {estudiante['usuario']}")
+    pdf.setAuthor("Plataforma Educativa")
+
+    carpeta_imagenes = Path(app.root_path) / "static" / "images"
+    pdf.drawImage(
+        str(carpeta_imagenes / "logo-sistemas.png"),
+        40, alto - 83, width=118, height=50, preserveAspectRatio=True, mask="auto",
+    )
+    pdf.drawImage(
+        str(carpeta_imagenes / "uts-logo.png"),
+        ancho - 160, alto - 83, width=120, height=53, preserveAspectRatio=True, mask="auto",
+    )
+    pdf.setFillColor(vino)
+    pdf.setFont("Helvetica-Bold", 17)
+    pdf.drawCentredString(ancho / 2, alto - 111, "REPORTE INDIVIDUAL DE APRENDIZAJE")
+    pdf.setStrokeColor(verde)
+    pdf.setLineWidth(2)
+    pdf.line(40, alto - 123, ancho - 40, alto - 123)
+
+    foto = estudiante["foto_perfil"]
+    if foto:
+        pdf.drawImage(
+            ImageReader(io.BytesIO(foto)), 48, alto - 222, width=72, height=72,
+            preserveAspectRatio=True, anchor="c", mask="auto",
+        )
+    else:
+        _, _, piel, cabello, ojos, _ = obtener_avatar(
+            estudiante["avatar_id"] or AVATAR_PREDETERMINADO
+        )
+        pdf.setFillColor(colors.HexColor(piel))
+        pdf.circle(84, alto - 185, 34, fill=1, stroke=0)
+        pdf.setFillColor(colors.HexColor(cabello))
+        pdf.wedge(50, alto - 184, 118, alto - 145, 0, 180, fill=1, stroke=0)
+        pdf.setFillColor(colors.HexColor(ojos))
+        pdf.circle(73, alto - 185, 2, fill=1, stroke=0)
+        pdf.circle(95, alto - 185, 2, fill=1, stroke=0)
+
+    nombre = estudiante["nombre_completo"] or estudiante["usuario"]
+    pdf.setFillColor(vino)
+    pdf.setFont("Helvetica-Bold", 15)
+    pdf.drawString(137, alto - 155, nombre[:70])
+    pdf.setFillColor(gris)
+    pdf.setFont("Helvetica", 10)
+    datos = [
+        f"Usuario: {estudiante['usuario']}    Edad: {estudiante['edad'] if estudiante['edad'] is not None else 'No registrada'}",
+        f"Correo: {estudiante['email'] or 'No registrado'}",
+        f"Celular: {estudiante['celular'] or 'No registrado'}",
+        f"Género: {estudiante['genero'] or 'No registrado'}",
+        "Último inicio de sesión: " + (
+            estudiante["ultimo_inicio_sesion"].strftime("%d/%m/%Y %H:%M")
+            if estudiante["ultimo_inicio_sesion"] else "Aún no ha ingresado"
+        ),
+    ]
+    for indice, linea in enumerate(datos):
+        pdf.drawString(137, alto - 173 - indice * 14, linea[:100])
+
+    y_resumen = alto - 250
+    pdf.setFillColor(verde)
+    pdf.roundRect(40, y_resumen - 54, ancho - 80, 62, 9, fill=1, stroke=0)
+    pdf.setFillColor(colors.white)
+    pdf.setFont("Helvetica-Bold", 10)
+    resumen = [
+        f"Cursos completos: {sum(total > 0 and hechas == total for _, hechas, total in progreso_cursos)} / {len(progreso_cursos)}",
+        f"Lecciones: {completadas} / {sum(total for _, _, total in progreso_cursos)}",
+        f"Intentos de actividades: {intentos}",
+        f"Evaluaciones: {estadisticas['cantidad']}",
+    ]
+    for indice, texto in enumerate(resumen):
+        pdf.drawString(54 + indice * 132, y_resumen - 19, texto[:24])
+    pdf.drawString(54, y_resumen - 40, f"Última actividad: {ultima_actividad.strftime('%d/%m/%Y %H:%M') if ultima_actividad else 'Sin actividad'}")
+
+    y_grafico = y_resumen - 82
+    pdf.setFillColor(vino)
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(44, y_grafico, "Progreso por curso")
+    max_lecciones = max((total for _, _, total in progreso_cursos), default=1) or 1
+    for indice, (titulo, hechas, total) in enumerate(progreso_cursos):
+        y = y_grafico - 25 - indice * 27
+        pdf.setFillColor(gris)
+        pdf.setFont("Helvetica", 9)
+        pdf.drawString(48, y + 4, titulo[:27])
+        barra_x, barra_ancho = 220, 245
+        pdf.setFillColor(colors.HexColor("#e5dccf"))
+        pdf.roundRect(barra_x, y, barra_ancho, 13, 5, fill=1, stroke=0)
+        pdf.setFillColor(magenta if total and hechas == total else verde)
+        pdf.roundRect(
+            barra_x, y, barra_ancho * (hechas / total if total else 0), 13, 5,
+            fill=1, stroke=0,
+        )
+        pdf.setFillColor(gris)
+        pdf.drawRightString(ancho - 46, y + 3, f"{hechas}/{total}")
+
+    y_chart_bottom = y_grafico - 25 - len(progreso_cursos) * 27 - 103
+    pdf.setFillColor(vino)
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(44, y_chart_bottom + 96, "Respuestas en evaluaciones")
+    correctas = int(estadisticas["correctas"] or 0)
+    incorrectas = int(estadisticas["incorrectas"] or 0)
+    total_respuestas = correctas + incorrectas
+    if total_respuestas:
+        angulo = 360 * correctas / total_respuestas
+        pdf.setFillColor(verde)
+        pdf.wedge(62, y_chart_bottom + 12, 132, y_chart_bottom + 82, 0, angulo, fill=1, stroke=0)
+        pdf.setFillColor(magenta)
+        pdf.wedge(62, y_chart_bottom + 12, 132, y_chart_bottom + 82, angulo, 360 - angulo, fill=1, stroke=0)
+    else:
+        pdf.setFillColor(colors.HexColor("#e5dccf"))
+        pdf.circle(97, y_chart_bottom + 47, 35, fill=1, stroke=0)
+    pdf.setFillColor(gris)
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(150, y_chart_bottom + 65, f"Correctas: {correctas}")
+    pdf.drawString(150, y_chart_bottom + 45, f"Incorrectas: {incorrectas}")
+    pdf.setFillColor(verde)
+    pdf.rect(136, y_chart_bottom + 62, 8, 8, fill=1, stroke=0)
+    pdf.setFillColor(magenta)
+    pdf.rect(136, y_chart_bottom + 42, 8, 8, fill=1, stroke=0)
+
+    pdf.setFillColor(vino)
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(340, y_chart_bottom + 96, "Cursos realizados y pendientes")
+    for indice, (titulo, hechas, total) in enumerate(progreso_cursos):
+        y = y_chart_bottom + 75 - indice * 19
+        estado = "Completo" if total and hechas == total else f"Pendiente ({max(total - hechas, 0)} lecciones)"
+        pdf.setFillColor(gris)
+        pdf.setFont("Helvetica", 8)
+        pdf.drawString(344, y, f"{titulo[:23]}: {estado}"[:50])
+
+    pie_y = y_chart_bottom - 12
+    if evaluaciones and pie_y < 78:
+        pdf.showPage()
+        pie_y = alto - 55
+    pdf.setFillColor(vino)
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(44, pie_y, "Evaluaciones realizadas")
+    pdf.setFillColor(gris)
+    pdf.setFont("Helvetica", 8)
+    for indice, evaluacion in enumerate(evaluaciones[:5]):
+        texto = f"{evaluacion['titulo'] or 'Evaluación'}: {evaluacion['puntos']}/{evaluacion['total_preguntas']} — {evaluacion['creado_en'].strftime('%d/%m/%Y')}"
+        pdf.drawString(48, pie_y - 15 - indice * 13, texto[:90])
+    pdf.setFillColor(verde)
+    pdf.setFont("Helvetica", 8)
+    pdf.drawString(44, 28, f"Plataforma Educativa · {len(cursos)} cursos · {sum(len(items) for items in ordenes.values())} lecciones · {total_usuarios} usuarios registrados")
+    pdf.drawRightString(ancho - 40, 28, f"Generado {date.today().strftime('%d/%m/%Y')}")
+    pdf.save()
+    salida.seek(0)
+    return send_file(
+        salida,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"reporte-{_slug_base(nombre)}.pdf",
+    )
+
 
 @app.route('/progreso')
 @estudiante_requerido
@@ -1242,12 +1627,14 @@ def admin():
 @app.route("/admin/estudiante/<int:usuario_id>")
 @administrador_requerido
 def admin_estudiante(usuario_id):
+    _asegurar_catalogo_inicializado()
     conexion = conectar_db()
     cursor = conexion.cursor(dictionary=True)
     try:
         cursor.execute(
             """
-            SELECT id, usuario, ultimo_inicio_sesion
+            SELECT id, usuario, nombre_completo, email, celular, genero, edad,
+                   avatar_id, foto_perfil, ultimo_inicio_sesion
             FROM usuarios
             WHERE id = %s AND rol = 'estudiante'
             """,
